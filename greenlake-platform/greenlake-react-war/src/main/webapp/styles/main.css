@@ -1,0 +1,44 @@
+body{
+    margin: 0px;
+    font-family: sans-serif;
+}
+
+#menubar{
+    display: flex;
+    justify-content: space-between;
+    background-color: #32a63b;
+    padding: 10px;
+    height: 25px;
+}
+
+#title{
+    display: inline-block;
+    vertical-align: middle;
+    margin-top: auto;
+    margin-bottom: auto;
+    margin-left: 10px;
+    margin-right: 0;
+    padding: 0;
+}
+
+#clock{
+    margin-top: auto;
+    margin-bottom: auto;
+    margin-left: 0;
+    margin-right: 0;
+    padding 0;
+}
+
+#pagetitle{
+    margin-top: auto;
+    margin-bottom: auto;
+    margin-left: 0;
+    margin-right: 0;
+    padding 0;
+}
+
+.side-menu{
+    height:100%;
+    background: red;
+
+}
