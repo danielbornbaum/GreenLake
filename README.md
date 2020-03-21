@@ -19,8 +19,4 @@ Projekt mit der Maven Konfiguration "clean install" bauen. Im Verzeichnis "green
 
 ### Schritt 5 - Modul in WildFly deployen
 Das gewünschte Modul kann dann in WildFly deployt werden, indem die .ear-Datei in das Verzeichnis path/to/wildfly/standalone/deployments/ kopiert wird. WildFly kann dann mit der standalone.bat im Verzeichnis path/to/wildfly/bin/standalone.bat deployt werden. 
-!! Achtung! Wildfly startet automatisch auf Port 8080 und kann daher mit localhost:8080 im Browser geöffnet werden. Um dies auf Port 80 umzubiegen, kann in der standalone.xml unter path/to/wildfly/standalone/ der Wert 
-    <socket-binding name="http" port="${jboss.http.port:8080}"/>
-auf 
-    <socket-binding name="http" port="${jboss.http.port:80}"/>
-geändert werden.
+!! Achtung! Wildfly startet automatisch auf Port 8080 und kann daher mit localhost:8080 im Browser geöffnet werden. Um dies auf Port 80 umzubiegen, kann in der standalone.xml unter path/to/wildfly/standalone/ der Wert für das http socket binding von 8080 auf 80 geändert werden
