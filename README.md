@@ -11,7 +11,7 @@ Da es sich bei dem Projekt um JavaEE-Module handelt, muss ein Application-Server
 ### Schritt 2 - NodeJS installieren
 Für das Entwickeln der Anwendung wird NodeJS benötigt. Dies kann hier heruntergeladen werden: https://nodejs.org/de/
 
-### Schritt 3 - Projekt auschecken
+### Schritt 3 - Projekt klonen
 Es wird empfohlen das Projekt zunächst zu klonen und dann ein Unterverzeichnis als Projekt in z.B. IntelliJ als Maven-Projekt zu öffnen (Über "Import Project" und das Hinzufügen des Framework Support für Maven im Project Setup)
 
 ### Schritt 4 - Modul bauen
