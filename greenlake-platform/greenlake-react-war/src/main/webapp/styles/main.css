@@ -40,5 +40,16 @@ body{
 .side-menu{
     height:100%;
     background: red;
+}
 
+button{
+    cursor: pointer;
+    padding: 5px;
+    border-radius: 2px;
+    border: none;
+    background-color: #32a63b;
+}
+
+button:hover{
+    background-color: #3bc446;
 }
