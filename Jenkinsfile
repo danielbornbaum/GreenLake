@@ -1,15 +1,10 @@
 node {
-	def rtMaven = Artifactory.newMavenBuild()
-	
-	stage('Clone sources') {
-        	git url: 'https://github.com/danielbornbaum/GreenLake.git'
+	def mvnHome = tool 'M3'
+	stage('Checkout') {
+        	git 'https://github.com/danielbornbaum/GreenLake.git'
     	}
 	
-	stage('Maven build') {
-		buildInfo = rtMaven.run pom: 'greenlake-platform/pom.xml', goals: 'clean install'
+	stage('Build') {
+		sh "${mvnHomw}/bin/maven-B package"
 	}
-	
-	stage('Publish build info') {
-        	server.publishBuildInfo buildInfo
-    	}
 }
