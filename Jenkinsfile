@@ -1,12 +1,6 @@
-node {
+unode {
 	stage('Checkout') {
-        	git(
-			userRemoteConfigs(
-				url: 'git@github.com:danielbornbaum/GreenLake.git',
-				credentialsId: 'GitHubSSH',
-				refspec: '+refs/heads/master:refs/remote/master'
-			)
-		)
+        	checkout scm: [$class: 'GitSCM', userRemoteConfigs: [url: 'git@github.com:danielbornbaum/GreenLake.git', credentialsId: 'GitHubSSH',]]
 	}
 	
 	stage('Build') {
