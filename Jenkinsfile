@@ -2,7 +2,8 @@ node {
 	stage('Checkout') {
         	git(
 			url: 'git@github.com:danielbornbaum/GreenLake.git',
-			credentialsId: 'GitHubSSH'			    	
+			credentialsId: 'GitHubSSH',
+			refspec: '+refs/heads/master:refs/remote/master'
 		)
 	}
 	
