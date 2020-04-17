@@ -7,5 +7,12 @@ node {
 	stage('Build') {
 		sh "/usr/share/maven/bin/mvn -B package -f greenlake-platform"
 	}
-
+	
+	stage('Deploy .ear (wildfly)') {
+		sh 'mv /var/lib/jenkins/workspace/GreenLake/greenlake-platform/greenlake-ear/target/greenlake-platform.ear /opt/wildfly-19.0.0.Final/standalone/deployments/'
+	}
+	
+	stage('Start wildfly server') {
+		sh 'systemctl start wildfly'	
+	}
 }
