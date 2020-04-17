@@ -5,6 +5,6 @@ node {
 	}
 	
 	stage('Build') {
-		sh "/usr/share/maven/bin/mvn -B package/greenlake-platform"
+		sh "/usr/share/maven/bin/mvn -B package -f greenlake-platform"
 	}
 }
