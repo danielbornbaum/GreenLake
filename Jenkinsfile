@@ -1,6 +1,7 @@
 node {
 	stage('Checkout') {
-        	checkout scm: [$class: 'GitSCM', userRemoteConfigs: [url: 'git@github.com:danielbornbaum/GreenLake.git', credentialsId: 'GitHubSSH',]]
+		git credentialsId: 'GitHubSSH',
+		    url: 'git@github.com:danielbornbaum/GreenLake.git'
 	}
 	
 	stage('Build') {
