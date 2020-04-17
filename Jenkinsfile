@@ -8,11 +8,9 @@ node {
 		sh "/usr/share/maven/bin/mvn -B package -f greenlake-platform"
 	}
 	
-	stage('Deploy .ear (wildfly)') {
+	stage('Deploy .ear and (re)start server') {
+		sh 'sudo systemctl stop wildfly'
 		sh 'sudo cp /var/lib/jenkins/workspace/GreenLake/greenlake-platform/greenlake-ear/target/greenlake-platform.ear /opt/wildfly-19.0.0.Final/standalone/deployments/'
-	}
-	
-	stage('Start wildfly server') {
-		sh 'sudo systemctl start wildfly'	
+		sh 'sudo systemctl start wildfly'
 	}
 }
