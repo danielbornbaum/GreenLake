@@ -5,6 +5,6 @@ node {
 	}
 	
 	stage('Build') {
-		sh "$MAVEN_HOME/bin/mvn-B package"
+		sh "${MAVEN_HOME}/bin/mvn-B package"
 	}
 }
