@@ -2,7 +2,7 @@ node {
 	stage('Checkout') {
         	git(
 			url: 'git@github.com:danielbornbaum/GreenLake.git',
-			credentialsId: 'Jenkins'			    	
+			credentialsId: 'GitHubSSH'			    	
 		)
 	}
 	
