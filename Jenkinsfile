@@ -7,9 +7,5 @@ node {
 	stage('Build') {
 		sh "/usr/share/maven/bin/mvn -B package -f greenlake-platform"
 	}
-	
-	stage('Save artifacts') {
-		    archiveArtifacts artifacts: 'build/libs/**/*.jar', fingerprint: true
-		    junit 'build/reports/**/*.xml'
-        }
+
 }
