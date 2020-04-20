@@ -2,14 +2,8 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="91427f08-1090-479c-ab88-7a869897c74a" name="Default Changelist" comment="">
-      <change beforePath="$PROJECT_DIR$/../greenhouae_data_generator/out/production/greenhouae_data_generator/com/company/AlternativeOneGreenhouseData.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../greenhouae_data_generator/out/production/greenhouae_data_generator/com/company/GreenhouseData.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../greenhouae_data_generator/out/production/greenhouae_data_generator/com/company/Main.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../greenhouae_data_generator/out/production/greenhouae_data_generator/com/company/StandardGreenhouseData.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../greenhouae_data_generator/src/com/company/GreenhouseDataModels/AlternativeOneGreenhouseData.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../greenhouae_data_generator/src/com/company/GreenhouseDataModels/GreenhouseData.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../greenhouae_data_generator/src/com/company/GreenhouseDataModels/StandardGreenhouseData.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../greenhouae_data_generator/src/com/company/Main.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/GeneratorThread.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/GeneratorThread.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />

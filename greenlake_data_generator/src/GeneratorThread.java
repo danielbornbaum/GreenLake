@@ -16,6 +16,7 @@ public class GeneratorThread extends Thread {
     public void run() {
         System.out.println( "Generator-Thread started with Greenhouse-ID " + greenhouseId + " and Type "  + greenhouseType);
         GreenhouseData greenhouseData;
+        //TODO neuesten Datensatz von gewähltem Typ abrufen und an Folgetag weitermachen
         switch (greenhouseType) {
             case 1:
                 greenhouseData = new StandardGreenhouseData(greenhouseId);
