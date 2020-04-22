@@ -53,4 +53,8 @@ public abstract class GreenhouseData {
         humiditySensValue1 = humidity;
         brightnessSensValue = brightness;
     }
+
+    public static GreenhouseData generateNewData(GreenhouseData oldData, GeneratorMonth month, long timeMillis) {
+        return oldData;
+    }
 }
