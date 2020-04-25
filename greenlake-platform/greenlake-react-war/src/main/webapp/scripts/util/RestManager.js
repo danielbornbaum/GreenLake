@@ -4,7 +4,8 @@ export function restRequest(url, method, requestBody, onCallback, onError){
         if (this.readyState == 4 && this.status == 200) {
             onCallback(this.responseText);
         } else if (this.readyState == 4){ //status not 200
-            onError(this.status, this.responseText);
+            if (onError !== undefined) onError();
+            alert("Ein Fehler ist aufgetreten: "+this.status+"\n"+JSON.parse(this.responseText).message);
         }
     }
     request.open(method, url, true);

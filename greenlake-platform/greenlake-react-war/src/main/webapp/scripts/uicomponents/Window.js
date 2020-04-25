@@ -12,6 +12,7 @@ export class Window extends React.Component{
 
         this.style = {
             width: this.props.width,
+            maxWidth: "100%",
             height: this.props.height,
             top: pos_y,
             left: pos_x,
@@ -22,17 +23,19 @@ export class Window extends React.Component{
         this.state = {hidden: false};
     }
 
-    onCloseButton = () => {
-        this.setState({hidden: true});
-    }
-
     render(){
         return(
-            <div>
-                <Draggable>
+            <div style={{position: "absolute", top: 0, left: 0, width: "100%", height:"100%",
+                         backgroundColor: "rgba(150, 150, 150, 0.4)", visibility: this.props.visibility}}>
+                <Draggable handle="span">
                     <div className="window" style={this.style}>
-                        <div className="window-title">{this.props.title} <div className="x-button-container" onClick={this.onCloseButton}><div className="x-button" /></div></div>
-                        <div className="window-content">{this.props.children}</div>
+                        <span className="window-title">{this.props.title}
+                            <div className="x-button-container" onClick={this.props.closeCommand}>
+                                <div className="x-button" onClick={this.props.closeCommand}/>
+                            </div>
+                        </span>
+                        <div className="window-content" draggable
+                         onDragStart={e => {e.preventDefault(); e.stopPropagation();}} >{this.props.children}</div>
                     </div>
                 </Draggable>
             </div>
