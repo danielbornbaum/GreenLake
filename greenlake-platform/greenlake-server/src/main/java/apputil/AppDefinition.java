@@ -2,20 +2,22 @@ package apputil;
 
 public class AppDefinition
 {
-    String translationKey;
-    String iconPath;
-    String url;
+    private String name;
+    private String iconPath;
+    private String url;
+    private int orderNumber;
 
-    public AppDefinition(String translationKey, String iconPath, String url)
+    public AppDefinition(String name, int orderNumber, String iconPath, String url)
     {
-        this.translationKey = translationKey;
+        this.name = name;
         this.iconPath = iconPath;
         this.url = url;
+        this.orderNumber = orderNumber;
     }
 
-    public String getTranslationKey()
+    public String getName()
     {
-        return translationKey;
+        return name;
     }
 
     public String getUrl()
@@ -26,5 +28,10 @@ public class AppDefinition
     public String getIconPath()
     {
         return iconPath;
+    }
+
+    public int getOrderNumber()
+    {
+        return orderNumber;
     }
 }

@@ -3,13 +3,20 @@ package apputil;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
-import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.HashMap;
+import java.util.List;
 
-public class AppManager implements Serializable
+public class AppManager
 {
     private HashMap<String, AppDefinition> appDefinitions = new HashMap<>();
     private static AppManager instance = null;
+
+    private AppManager()
+    {
+        registerApp("home", 0, "Home", "/homepage.html", "/images/icons/home.png");
+    }
 
     public static AppManager getInstance()
     {
@@ -20,14 +27,14 @@ public class AppManager implements Serializable
         return instance;
     }
 
-    public boolean registerApp(String appId, String translationKey, String url, String iconPath)
+    public boolean registerApp(String appId, int orderNumber, String name, String url, String iconPath)
     {
         if (appDefinitions.containsKey(appId))
         {
             return false;
         }
 
-        appDefinitions.put(appId, new AppDefinition(translationKey, iconPath, url));
+        appDefinitions.put(appId, new AppDefinition(name, orderNumber, iconPath, url));
         return true;
     }
 
@@ -44,15 +51,24 @@ public class AppManager implements Serializable
 
     public JSONArray getAppsAsJSON()
     {
-        JSONArray appsAsJSON = new JSONArray();
+        List<JSONObject> appList = new ArrayList<>();
 
-        for (AppDefinition definition : appDefinitions.values())
+        for (String appId : appDefinitions.keySet())
         {
+            AppDefinition definition = appDefinitions.get(appId);
             JSONObject appDefJSON = new JSONObject();
-            appDefJSON.put("translationKey", definition.translationKey).put("url", definition.url)
-                    .put("iconPath", definition.iconPath);
-            appsAsJSON.put(appDefJSON);
+            appDefJSON.put("appId", appId)
+                    .put("orderNumber", definition.getOrderNumber())
+                    .put("name", definition.getName())
+                    .put("url", definition.getUrl())
+                    .put("iconPath", definition.getIconPath());
+
+            appList.add(appDefJSON);
         }
+
+        appList.sort(Comparator.comparingInt(def -> def.getInt("orderNumber")));
+        JSONArray appsAsJSON = new JSONArray();
+        appList.forEach(appsAsJSON::put);
 
         return appsAsJSON;
     }

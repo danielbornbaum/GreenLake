@@ -6,6 +6,8 @@
 }
 
 .window-title{
+    display: block;
+    width: 100%;
     background-color: #32a63b;
     padding: 5px;
     text-align: center;

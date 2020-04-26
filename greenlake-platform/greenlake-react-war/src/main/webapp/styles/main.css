@@ -3,6 +3,12 @@ body{
     font-family: sans-serif;
 }
 
+#app-container{
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+
 #menubar{
     display: flex;
     justify-content: space-between;
@@ -37,9 +43,48 @@ body{
     padding 0;
 }
 
-.side-menu{
-    height:100%;
-    background: red;
+#application-body{
+    flex: 1;
+}
+
+.side-menu-fade-in{
+    position: absolute;
+    height: calc(100% - 45px);
+    top: 45px;
+    background: #9eeb34;
+    max-width: 200px;
+    width: 200px;
+    z-index: 1000;
+    overflow-y: auto;
+    overflow-x: hidden;
+
+    opacity: 0;
+
+    -webkit-transition: opacity 0.5s ease-out;
+    -moz-transition: opacity 0.5s ease-out;
+    -ms-transition: opacity 0.5s ease-out;
+    -o-transition: opacity 0.5s ease-out;
+    transition: opacity 0.5s ease-out;
+}
+
+.side-menu-fade-out{
+    position: absolute;
+    height: calc(100% - 45px);
+    top: 45px;
+    background: #9eeb34;
+    max-width: 200px;
+    width: 200px;
+    z-index: 1000;
+    overflow-y: auto;
+    overflow-x: hidden;
+
+    opacity: 1;
+
+    -webkit-transition: opacity 0.5ss ease-in;
+    -moz-transition: opacity 0.5ss ease-in;
+    -ms-transition: opacity 0.5ss ease-in;
+    -o-transition: opacity 0.5ss ease-in;
+    transition: opacity 0.5ss ease-in;
 }
 
 button{
@@ -50,6 +95,16 @@ button{
     background-color: #32a63b;
 }
 
+button:disabled{
+    background-color: #b9dbbc;
+    color: #fff;
+}
+
 button:hover{
     background-color: #3bc446;
+}
+
+.home-background{
+    width: 100%;
+    height: auto;
 }

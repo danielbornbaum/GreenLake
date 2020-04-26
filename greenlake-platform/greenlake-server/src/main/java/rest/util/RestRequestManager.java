@@ -1,22 +1,45 @@
 package rest.util;
 
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.util.function.Consumer;
+import java.util.logging.Logger;
 
 public class RestRequestManager extends JSONObject
 {
-    private String message = "";
-    private String mediaType = MediaType.APPLICATION_JSON;
-    private boolean implicitMediaType = true;
+    private String message = "{}";
+    private boolean successful = true;
+    private static final Logger LOGGER = Logger.getLogger(RestRequestManager.class.getName());
 
     private int statusCode = HTTPStatusCodes.SUCCESS_CODES.OK.getCode();
 
-    public RestRequestManager(String json)
+    public RestRequestManager()
     {
-        super(json);
+        super("{}");
+    }
+
+    public RestRequestManager setParameters(String parameters)
+    {
+        keySet().forEach(this::remove);
+        JSONObject parametersJSON;
+
+        try
+        {
+            parametersJSON = new JSONObject(parameters);
+        }
+        catch (JSONException e)
+        {
+            setError(HTTPStatusCodes.CLIENT_ISSUES.BAD_REQUEST, "No valid JSON given", false);
+            return this;
+        }
+
+        parametersJSON.keySet().forEach(key -> put(key, parametersJSON.get(key)));
+        return this;
     }
 
     public RestRequestManager assertKeys(String[] keys)
@@ -27,7 +50,6 @@ public class RestRequestManager extends JSONObject
         {
             if (!has(key))
             {
-                statusCode = HTTPStatusCodes.CLIENT_ISSUES.BAD_REQUEST.getCode();
                 if (!"".equals(missingKeys.toString()))
                 {
                     missingKeys.append(", ");
@@ -36,60 +58,89 @@ public class RestRequestManager extends JSONObject
             }
         }
 
-        if ("".equals(missingKeys.toString()))
+        if (!"".equals(missingKeys.toString()))
         {
-            message = "Your request is missing this/those key(s): " + missingKeys.toString();
-            mediaType = MediaType.TEXT_PLAIN;
+            setError(HTTPStatusCodes.CLIENT_ISSUES.BAD_REQUEST,
+                     "Your request is missing this/those key(s): " + missingKeys.toString(), false);
         }
 
-        return this;
-    }
-
-    public RestRequestManager setMediaType(String mediaType)
-    {
-        this.mediaType = mediaType;
-        implicitMediaType = false;
-        return this;
-    }
-
-    public RestRequestManager setMessage(String message)
-    {
-        this.message = message;
-
-        if (implicitMediaType)
-        {
-            mediaType = MediaType.TEXT_PLAIN;
-        }
-
-        return this;
-    }
-
-    public RestRequestManager setMessage(JSONObject message)
-    {
-        this.message = message.toString();
-
-        if (implicitMediaType)
-        {
-            mediaType = MediaType.APPLICATION_JSON;
-        }
-
-        return this;
-    }
-
-    public RestRequestManager setStatusCode(HTTPStatusCodes.Codes code)
-    {
-        statusCode = code.getCode();
         return this;
     }
 
     public RestRequestManager execute(Consumer<RestRequestManager> consumer)
     {
-        consumer.accept(this);
+        if (successful)
+        {
+            try
+            {
+                consumer.accept(this);
+            }
+            catch (Exception e)
+            {
+                setError(HTTPStatusCodes.SERVER_ISSUES.INTERNAL_SERVER_ERROR, "A server side exception occured", false);
+
+                StringWriter sw = new StringWriter();
+                e.printStackTrace(new PrintWriter(sw));
+                LOGGER.severe(sw.toString());
+            }
+        }
+
+        return this;
+    }
+
+    public void setCustomSuccessCode(HTTPStatusCodes.SUCCESS_CODES successCode)
+    {
+        statusCode = successCode.getCode();
+    }
+
+    public void setCustomError(HTTPStatusCodes.CLIENT_ISSUES issueCode, String message, boolean log)
+    {
+        setError(issueCode, message, log);
+    }
+
+    public void setCustomError(HTTPStatusCodes.CLIENT_ISSUES issueCode, String message)
+    {
+        setError(issueCode, message, false);
+    }
+
+    public void setCustomError(HTTPStatusCodes.SERVER_ISSUES issueCode, String message, boolean log)
+    {
+        setError(issueCode, message, log);
+    }
+
+    public void setCustomError(HTTPStatusCodes.SERVER_ISSUES issueCode, String message)
+    {
+        setError(issueCode, message, false);
+    }
+
+    public RestRequestManager setMessage(JSONObject message)
+    {
+        if (successful)
+        {
+            this.message = message.toString();
+        }
+        else
+        {
+            LOGGER.warning("A manual set message has been overwritten due to the occurrence of an error");
+        }
+
         return this;
     }
 
     public Response generateResponse()
     {
-        return Response.status(statusCode).header("Content-Type", mediaType).entity(message).build();
+        return Response.status(statusCode).header("Content-Type", MediaType.APPLICATION_JSON).entity(message).build();
+    }
+
+    private void setError(HTTPStatusCodes.Codes code, String message, boolean log)
+    {
+        successful = false;
+        statusCode = code.getCode();
+        this.message = new JSONObject().put("message", message).toString();
+
+        if (log)
+        {
+            LOGGER.severe(String.format("%d: %s", code.getCode(), message));
+        }
     }
 }
