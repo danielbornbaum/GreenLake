@@ -1,9 +1,10 @@
 package GreenhouseDataModels;
 
+import javafx.util.Pair;
+
 import java.time.LocalTime;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+import java.time.YearMonth;
+import java.util.*;
 
 public class StandardGreenhouseData implements IGreenhouseData {
 
@@ -99,25 +100,55 @@ public class StandardGreenhouseData implements IGreenhouseData {
     public void setBrightnessSensValue(float brightnessSensValue) { this.brightnessSensValue = brightnessSensValue; }
     //endregion
 
-    public List<IGreenhouseData> generateNewDay(int secondInterval, int monthRainDays, GeneratorMonth month, Date date, float lastTemperatureIn, float lastTemperatureOut, float lastHumidityIn, float lastHumidityOut) {
+    public Pair<List<IGreenhouseData>, Integer> generateNewDay(int secondInterval, int monthRainDays, GeneratorMonth month, Date date, float lastTemperatureIn, float lastTemperatureOut, float lastHumidityIn, float lastHumidityOut) {
+        Random random = new Random();
         List<IGreenhouseData> day = new ArrayList<IGreenhouseData>();
+        int monthNr = date.getMonth();
+        int yearNr = date.getYear();
+        int monthDays = YearMonth.of(yearNr, monthNr).lengthOfMonth();
         int entryCount = (24 * 3600) / secondInterval;
+        int noon = (12 * 3600) / secondInterval;
+        int afternoon = (16 * 3600) / secondInterval;
+        int rainStartEntry = 0;
+        int rainEndEntry = 0;
+        int fogEndEntry = 0;
+        int brightEntries = Math.round(month.intenseSunHours * 3600 / secondInterval);
+        int leftNormalEntries = entryCount;
+        boolean ventilate = false;
         boolean rain = false;
-        double rainDuration;
+        boolean humidBeforeRain;
+        float humidEntryBeforeRain = 0;
         boolean fog = false;
-        double fogDurationSinceSunrise;
+        float tempInside = 0;
+        float tempOutside = 0;
+        float humidityInside = 0;
+        float humidityOutside = 0;
+        float brightness = 0;
+        float tempDifference = 0;
+        float rainStartTemp = 0;
 
-        if (monthRainDays < month.rainDays) {
-            rain = true;
-            rainDuration = Math.random() * 10 * 3600;
+        //Generate special conditions (rain / fog)
+        if(generateWeightedDecision(0.4) || monthDays - date.getDay() == monthRainDays) {
+            monthRainDays--;
+            int rainEntries = (int) Math.round((1 + random.nextInt(9)) * 3600 / secondInterval);
+            leftNormalEntries = leftNormalEntries - rainEntries;
+            rainStartEntry = random.nextInt(entryCount - rainEntries);
+            rainEndEntry = rainStartEntry + rainEntries - 1;
+            if (month.season == Season.SUMMER && generateWeightedDecision(0.35) &&
+                    rainStartEntry > (10 * 3600 / secondInterval)) {
+                humidEntryBeforeRain = rainStartEntry - Math.round(random.nextInt(8) / 2 * 3600 / secondInterval);
+            }
+            else {
+                humidBeforeRain = false;
+            }
         }
-        if (month.season == Season.FALL) {
-            fog = generateWeightedDecision(0.84);
-            fogDurationSinceSunrise = Math.random() * 4 * 3600;
+        if (month.season == Season.FALL && generateWeightedDecision(0.84)) {
+            int fogEntriesSinceSunrise = (int) Math.round((1 + random.nextInt(3)) * 3600 / secondInterval);
+            leftNormalEntries = leftNormalEntries - fogEntriesSinceSunrise;
+            fogEndEntry = (int) Math.round((month.sunrise.getMinute() * 60 + month.sunrise.getHour() * 3600 + 3600 * Math.random() * 0.25) / secondInterval);
         }
 
-        //TODO calc rain start/end
-
+        //Generate first constant entry
         StandardGreenhouseData data = new StandardGreenhouseData(1);
         data.setTempSensValue1(lastTemperatureOut);
         data.setTempSensValue2(lastTemperatureIn);
@@ -131,9 +162,34 @@ public class StandardGreenhouseData implements IGreenhouseData {
         data.setMoistureSensValue4(70);
 
         day.add(data);
+        StandardGreenhouseData lastInstance = data;
 
+        //Loop generating all other entries
         for (int entry = 1; entry < entryCount; entry++) {
-            StandardGreenhouseData lastInstance = (StandardGreenhouseData) day.get(entry - 1);
+            brightness = lastInstance.getBrightnessSensValue();
+            tempOutside = lastInstance.getTempSensValue1();
+            tempInside = lastInstance.getTempSensValue2();
+            tempDifference = tempOutside - tempInside;
+            humidityOutside = lastInstance.getHumiditySensValue1();
+            humidityInside = lastInstance.getHumiditySensValue2();
+            if (humidEntryBeforeRain <= entry && entry < rainStartEntry) {
+                humidBeforeRain = true;
+                rain = false;
+            }
+            else if (rainEndEntry > 0 && rainStartEntry <= entry && entry <= rainEndEntry) {
+                rain = true;
+                humidBeforeRain = false;
+            }
+            else {
+                rain = false;
+                humidBeforeRain = false;
+            }
+            if(entry < fogEndEntry) {
+                fog = true;
+            }
+            else {
+                fog = false;
+            }
 
             //Set Time DONE
             data.setTime(lastInstance.getTime().plusSeconds(secondInterval));
@@ -144,23 +200,187 @@ public class StandardGreenhouseData implements IGreenhouseData {
             data.setMoistureSensValue3(generateMoisture(lastInstance.getMoistureSensValue3()));
             data.setMoistureSensValue4(generateMoisture(lastInstance.getMoistureSensValue4()));
 
-            //Set Brightness
-            if(data.getTime().isBefore(month.sunrise) || data.getTime().isBefore(month.sunset)) {
-                data.setBrightnessSensValue(0);
+            //Set Temperature DONE
+            //Outside DONE
+            if (data.getTime().isBefore(month.sunrise)) {
+                tempOutside = tempOutside - (float) 0.1 + (float) Math.random() / 5;
             }
-            //TODO bei Regen
-            //TODO tagsüber
+            else if (data.getTime().isAfter(month.sunset)) {
+                tempOutside = tempOutside - (float) Math.random() / 2;
+            }
+            else {
+                if (rain) {
+                    float tempDiff = month.avgMaxTemp - tempOutside;
+                    if (tempDiff > 8) {
+                        tempOutside = tempOutside + (float) Math.random() / 10;
+                    }
+                    else if (tempDiff < -2) {
+                        tempOutside = tempOutside - (float) Math.random() / 2;
+                    }
+                    else {
+                        tempOutside = tempOutside - (float) 0.2 + (float) Math.random() * (float) 0.4;
+                    }
+                }
+                else if (fog) {
+                    tempOutside = tempOutside + (float) Math.random() / 7;
+                }
+                else if (brightness > 75){
+                    tempOutside = tempOutside + (float) Math.random() / 3;
+                }
+                else if (brightness > 50) {
+                    tempOutside = tempOutside + (float) Math.random() / 8;
+                }
+                else if (brightness < 30){
+                    tempOutside = tempOutside - (float) 0.05 + (float) Math.random() / 10;
+                }
+                else {
+                    tempOutside = tempOutside - (float) 0.1 + (float) Math.random() / 5;
+                }
+            }
 
-            //Set Temperature
-            //TODO temp außen (Regen/Nebel/Sonne)
-            //TODO temp innen (Sonne/Temp außen)
+            if (tempOutside > month.absoluteMaxTemp) {
+                tempOutside = month.absoluteMaxTemp;
+            }
+            else if (tempOutside < month.absoluteMinTemp) {
+                tempOutside = month.absoluteMinTemp;
+            }
+            data.setTempSensValue1(tempOutside);
 
-            //Set Humidity
-            //TODO humidity außen (Regen/Nebel)
-            //TODO humidity innen (bei Regen -> nur Vent = langsamere Abnahme)
+            //Inside DONE
+            if(tempDifference > 10){
+                if (brightness > 80) {
+                    tempInside = tempInside + (float) Math.random();
+                }
+                else {
+                    tempInside = tempInside + (float) Math.random() / 2;
+                }
+            }
+            else if (tempDifference > 5) {
+                if (lastInstance.getBrightnessSensValue() > 80) {
+                    tempInside = tempInside + (float) Math.random() / 2;
+                }
+                else {
+                    tempInside = tempInside + (float) Math.random() / 3;
+                }
+            }
+            else if (tempDifference < -5) {
+                if (lastInstance.getBrightnessSensValue() > 80) {
+                    tempInside = tempInside - (float) Math.random() / 4;
+                }
+                else {
+                    tempInside = tempInside - (float) Math.random() / 3;
+                }
+            }
+            else if (tempDifference < -10) {
+                if (lastInstance.getBrightnessSensValue() > 80) {
+                    tempInside = tempInside - (float) Math.random() / 3;
+                }
+                else {
+                    tempInside = tempInside - (float) Math.random() / 2;
+                }
+            }
+            data.setTempSensValue2(tempInside);
+
+            //Set Brightness DONE
+            if(data.getTime().isBefore(month.sunrise) || data.getTime().isAfter(month.sunset)) {
+                brightness = 0;
+            }
+            else if(rain) {
+                brightness = 20 + random.nextInt(15);
+            }
+            else if(leftNormalEntries == brightEntries || (!rain && !fog && brightEntries > 0 && generateWeightedDecision(0.65))) {
+                brightness = 85 + random.nextInt(15);
+                brightEntries--;
+            }
+            else {
+                brightness = brightness - 5 + random.nextInt(10);
+                if (brightness > 83) {
+                    brightness = 82;
+                }
+                else if (brightness < 40) {
+                    brightness = 41;
+                }
+            }
+            data.setBrightnessSensValue(brightness);
+
+            //Set Humidity DONE
+            // Outside DONE
+            if (fog) {
+                humidityOutside = 95 + (float) Math.random() * 5;
+            }
+            else if (rain || (humidBeforeRain && entry >= humidEntryBeforeRain)) {
+                if (humidityOutside < 70) {
+                    humidityOutside = humidityOutside + (float) Math.random() * 10;
+                } else {
+                    humidityOutside = humidityOutside - 3 + (float) Math.random() * 6;
+                    if (humidityOutside < 70) {
+                        humidityOutside = 70;
+                    } else if (humidityOutside > 90) {
+                        humidityOutside = 90;
+                    }
+                }
+            }
+            else if (month.season == Season.SUMMER && noon < entry && entry < afternoon) {
+                if (humidityOutside > 55) {
+                    humidityOutside = humidityOutside - (float) Math.random() * 5;
+                }
+                else if (humidityOutside < 40) {
+                    humidityOutside = 41;
+                }
+                else {
+                    humidityOutside = humidityOutside - 2 + (float) Math.random() * 4;
+                }
+            }
+            else if (month.season == Season.WINTER && brightness > 70) {
+                if (humidityOutside > 85) {
+                    humidityOutside = 84;
+                }
+                else if (humidityOutside < 70) {
+                    humidityOutside = humidityOutside + (float) Math.random() * 5;
+                }
+                else {
+                    humidityOutside = humidityOutside - 2 + (float) Math.random() * 4;
+                }
+            }
+            else {
+                if (humidityOutside > (month.avgHumidity + 7)) {
+                    humidityOutside = humidityOutside - (float) Math.random() * 2;
+                }
+                else if (humidityOutside < (month.avgHumidity - 7)) {
+                    humidityOutside = humidityOutside + (float) Math.random() * 2;
+                }
+                else {
+                    humidityOutside = humidityOutside - (float) 0.5 + (float) Math.random();
+                }
+            }
+            data.setHumiditySensValue1(humidityOutside);
+
+            //Inside DONE
+            if (humidityInside > 82) {
+                ventilate = true;
+            }
+            else if (humidityInside < 56 && ventilate) {
+                ventilate = false;
+            }
+
+            if(ventilate) {
+                if(rain) {
+                    humidityInside = humidityInside - (float) Math.random() * 2;
+                }
+                else {
+                    humidityInside = humidityInside - (float) Math.random() * 4;
+                }
+            }
+            else {
+                humidityInside = humidityInside + (float) Math.random();
+            }
+            data.setHumiditySensValue2(humidityInside);
+
+            day.add(data);
+            lastInstance = data;
         }
 
-        return day;
+        return new Pair<>(day, monthRainDays);
     }
 
     private boolean generateWeightedDecision(double occurenceProbability) {

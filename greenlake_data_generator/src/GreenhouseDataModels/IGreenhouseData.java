@@ -1,5 +1,7 @@
 package GreenhouseDataModels;
 
+import javafx.util.Pair;
+
 import java.util.Date;
 import java.util.List;
 
@@ -25,5 +27,5 @@ public interface IGreenhouseData {
 
     void setBrightnessSensValue(float brightnessSensValue);
 
-    List<IGreenhouseData> generateNewDay(int secondInterval, int monthRainDays, GeneratorMonth month, Date date, float lastTemperatureIn, float lastTemperatureOut, float lastHumidityIn, float lastHumidityOut);
+    Pair<List<IGreenhouseData>, Integer> generateNewDay(int secondInterval, int monthRainDays, GeneratorMonth month, Date date, float lastTemperatureIn, float lastTemperatureOut, float lastHumidityIn, float lastHumidityOut);
 }
