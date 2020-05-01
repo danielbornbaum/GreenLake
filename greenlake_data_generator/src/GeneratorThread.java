@@ -1,6 +1,8 @@
 import GreenhouseDataModels.*;
 import javafx.util.Pair;
 
+import java.io.File;
+import java.io.FileWriter;
 import java.time.LocalTime;
 import java.util.Calendar;
 import java.util.Date;
@@ -38,6 +40,7 @@ public class GeneratorThread extends Thread {
         switch (greenhouseType) {
             case 1:
                 greenhouseData = new StandardGreenhouseData(greenhouseId);
+                break;
             case 2:
                 greenhouseData = new AlternativeOneGreenhouseData(greenhouseId);
                 break;
@@ -61,9 +64,18 @@ public class GeneratorThread extends Thread {
         int monthRainDays = 0;
         Date date;
         GeneratorMonth currentMonth = january;
-        Pair<List<IGreenhouseData>, Integer> result;
+        List<IGreenhouseData> list = null;
+        IGreenhouseData lastEntry = null;
+        Pair<List<IGreenhouseData>, Integer> result = null;
         while(runThread) {
-            //TODO last... Werte überschreiben
+            if (result != null) {
+                list = result.getKey();
+                lastEntry = list.get(list.size() - 1);
+                lastTemperatureOut = lastEntry.getTempSensValue1();
+                lastTemperatureIn = lastEntry.getTempSensValue2();
+                lastHumidityOut = lastEntry.getHumiditySensValue1();
+                lastHumidityIn = lastEntry.getHumiditySensValue2();
+            }
             currentMonthNumber = calendar.get(Calendar.MONTH);
             if(oldMonthNumber != currentMonthNumber) {
                 switch (currentMonthNumber) {
@@ -110,6 +122,24 @@ public class GeneratorThread extends Thread {
             date = calendar.getTime();
             result = greenhouseData.generateNewDay(secondInterval, monthRainDays, currentMonth, date, lastTemperatureIn, lastTemperatureOut, lastHumidityIn, lastHumidityOut);
             monthRainDays = result.getValue();
+
+            //TODO remove
+            try {
+                FileWriter writer = new FileWriter("output.txt");
+                List<IGreenhouseData> resList = result.getKey();
+                for (int i = 0; i < resList.size(); i++) {
+                    StandardGreenhouseData entry = (StandardGreenhouseData) resList.get(i);
+                    writer.write(String.format("Entry %d: TempOUT: %f, TempIN: %f, HumidityOUT: %f, HumidityIN: %f, Brightness: %f, " +
+                                    "Moisture1: %d, Moisture2: %d, Moisture3: %d, Moisture4: %d", entry.getId(), entry.getTempSensValue1(),
+                            entry.getTempSensValue2(), entry.getHumiditySensValue1(), entry.getHumiditySensValue2(), entry.getBrightnessSensValue(),
+                            entry.getMoistureSensValue1(), entry.getMoistureSensValue2(), entry.getMoistureSensValue3(), entry.getMoistureSensValue4()) + System.lineSeparator());
+                }
+                writer.close();
+            }
+            catch (Exception e) {
+                System.out.println("Error writing to file");
+            }
+            stopExecution();
             //TODO save new data in lake
             calendar.add(Calendar.DAY_OF_WEEK_IN_MONTH, 1);
         }

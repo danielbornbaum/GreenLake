@@ -13,7 +13,11 @@ public interface IGreenhouseData {
 
     float getTempSensValue1();
 
+    float getTempSensValue2();
+
     float getHumiditySensValue1();
+
+    float getHumiditySensValue2();
 
     float getBrightnessSensValue();
 
@@ -23,7 +27,11 @@ public interface IGreenhouseData {
 
     void setTempSensValue1(float tempSensValue1);
 
+    void setTempSensValue2(float tempSensValue2);
+
     void setHumiditySensValue1(float humiditySensValue1);
+
+    void setHumiditySensValue2(float humiditySensValue2);
 
     void setBrightnessSensValue(float brightnessSensValue);
 

@@ -102,7 +102,7 @@ public class StandardGreenhouseData implements IGreenhouseData {
 
     public Pair<List<IGreenhouseData>, Integer> generateNewDay(int secondInterval, int monthRainDays, GeneratorMonth month, Date date, float lastTemperatureIn, float lastTemperatureOut, float lastHumidityIn, float lastHumidityOut) {
         Random random = new Random();
-        List<IGreenhouseData> day = new ArrayList<IGreenhouseData>();
+        List<IGreenhouseData> day = new ArrayList<>();
         int monthNr = date.getMonth();
         int yearNr = date.getYear();
         int monthDays = YearMonth.of(yearNr, monthNr).lengthOfMonth();
@@ -125,11 +125,11 @@ public class StandardGreenhouseData implements IGreenhouseData {
         float humidityOutside = 0;
         float brightness = 0;
         float tempDifference = 0;
-        float rainStartTemp = 0;
+        boolean dawn = false;
 
         //Generate special conditions (rain / fog)
-        if(generateWeightedDecision(0.4) || monthDays - date.getDay() == monthRainDays) {
-            monthRainDays--;
+        if(generateWeightedDecision(0.4) || monthDays - date.getDay() == month.rainDays) {
+            monthRainDays++;
             int rainEntries = (int) Math.round((1 + random.nextInt(9)) * 3600 / secondInterval);
             leftNormalEntries = leftNormalEntries - rainEntries;
             rainStartEntry = random.nextInt(entryCount - rainEntries);
@@ -139,9 +139,15 @@ public class StandardGreenhouseData implements IGreenhouseData {
                 humidEntryBeforeRain = rainStartEntry - Math.round(random.nextInt(8) / 2 * 3600 / secondInterval);
             }
             else {
-                humidBeforeRain = false;
+                humidEntryBeforeRain = 0;
             }
         }
+        else {
+            rainStartEntry = 0;
+            rainEndEntry = 0;
+            humidEntryBeforeRain = 0;
+        }
+
         if (month.season == Season.FALL && generateWeightedDecision(0.84)) {
             int fogEntriesSinceSunrise = (int) Math.round((1 + random.nextInt(3)) * 3600 / secondInterval);
             leftNormalEntries = leftNormalEntries - fogEntriesSinceSunrise;
@@ -166,13 +172,14 @@ public class StandardGreenhouseData implements IGreenhouseData {
 
         //Loop generating all other entries
         for (int entry = 1; entry < entryCount; entry++) {
+            data = new StandardGreenhouseData(entry + 1);
             brightness = lastInstance.getBrightnessSensValue();
             tempOutside = lastInstance.getTempSensValue1();
             tempInside = lastInstance.getTempSensValue2();
             tempDifference = tempOutside - tempInside;
             humidityOutside = lastInstance.getHumiditySensValue1();
             humidityInside = lastInstance.getHumiditySensValue2();
-            if (humidEntryBeforeRain <= entry && entry < rainStartEntry) {
+            if (humidEntryBeforeRain > 0 &&humidEntryBeforeRain <= entry && entry < rainStartEntry) {
                 humidBeforeRain = true;
                 rain = false;
             }
@@ -263,20 +270,20 @@ public class StandardGreenhouseData implements IGreenhouseData {
                     tempInside = tempInside + (float) Math.random() / 3;
                 }
             }
-            else if (tempDifference < -5) {
-                if (lastInstance.getBrightnessSensValue() > 80) {
-                    tempInside = tempInside - (float) Math.random() / 4;
-                }
-                else {
-                    tempInside = tempInside - (float) Math.random() / 3;
-                }
-            }
             else if (tempDifference < -10) {
                 if (lastInstance.getBrightnessSensValue() > 80) {
                     tempInside = tempInside - (float) Math.random() / 3;
                 }
                 else {
                     tempInside = tempInside - (float) Math.random() / 2;
+                }
+            }
+            else if (tempDifference < -5) {
+                if (lastInstance.getBrightnessSensValue() > 80) {
+                    tempInside = tempInside - (float) Math.random() / 4;
+                }
+                else {
+                    tempInside = tempInside - (float) Math.random() / 3;
                 }
             }
             data.setTempSensValue2(tempInside);
@@ -288,7 +295,14 @@ public class StandardGreenhouseData implements IGreenhouseData {
             else if(rain) {
                 brightness = 20 + random.nextInt(15);
             }
-            else if(leftNormalEntries == brightEntries || (!rain && !fog && brightEntries > 0 && generateWeightedDecision(0.65))) {
+            else if(data.getTime().minusMinutes(80).isBefore(month.sunrise) || data.getTime().plusMinutes(80).isAfter(month.sunset) ) {
+                dawn = true;
+            }
+            else {
+                dawn = false;
+            }
+
+            if(!dawn && (leftNormalEntries == brightEntries || (!rain && !fog && brightEntries > 0 && generateWeightedDecision(0.65)))) {
                 brightness = 85 + random.nextInt(15);
                 brightEntries--;
             }
