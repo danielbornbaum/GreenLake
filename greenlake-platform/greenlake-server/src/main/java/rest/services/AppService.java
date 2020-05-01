@@ -2,8 +2,8 @@ package rest.services;
 
 import apputil.AppManager;
 import org.json.JSONObject;
-import rest.util.HTTPStatusCodes.CLIENT_ISSUES;
-import rest.util.RestRequestManager;
+import util.HTTPStatusCodes;
+import util.RestRequestManager;
 
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
@@ -25,7 +25,8 @@ public class AppService
                     if (restRequestManager.getInt("orderNumber") < 1)
                     {
                         restRequestManager
-                                .setCustomError(CLIENT_ISSUES.BAD_REQUEST, "orderNumber must be 1 or greater");
+                                .setCustomError(HTTPStatusCodes.CLIENT_ISSUES.BAD_REQUEST,
+                                                "orderNumber must be 1 or greater");
                         return;
                     }
 
@@ -38,7 +39,7 @@ public class AppService
 
                     if (!registered)
                     {
-                        restRequestManager.setCustomError(CLIENT_ISSUES.CONFLICT,
+                        restRequestManager.setCustomError(HTTPStatusCodes.CLIENT_ISSUES.CONFLICT,
                                                           String.format("An app with id %s is already registered",
                                                                         restRequestManager.getString("appId")));
                     }
@@ -63,7 +64,7 @@ public class AppService
 
                     if (!unregistered)
                     {
-                        restRequestManager.setCustomError(CLIENT_ISSUES.CONFLICT,
+                        restRequestManager.setCustomError(HTTPStatusCodes.CLIENT_ISSUES.CONFLICT,
                                                           String.format("An app with the id %s is not registered.",
                                                                         restRequestManager.getString("appId")));
                     }

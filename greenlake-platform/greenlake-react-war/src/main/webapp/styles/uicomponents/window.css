@@ -1,8 +1,13 @@
 .window{
+    display: flex;
+    flex-direction: column;
     border: 1px solid #2c8d34;
     border-radius: 2px;
     position: absolute;
     box-shadow: 7px 7px 5px rgba(50, 50, 50, 0.1);
+    backgroundColor: #FFF;
+    overflow: hidden;
+    maxWidth: 100%;
 }
 
 .window-title{
@@ -16,6 +21,8 @@
 .window-content{
     background-color: #FFF;
     padding: 10px;
+    overflow-y: auto;
+    flex: 1;
 }
 
 .x-button-container{

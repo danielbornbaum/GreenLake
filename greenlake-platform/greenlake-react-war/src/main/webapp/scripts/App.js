@@ -4,13 +4,16 @@ import {MenuButton} from "./uicomponents/MenuButton.js"
 import {MainMenu} from "./uicomponents/MainMenu.js"
 import {Window} from "./uicomponents/Window.js"
 import {restRequest} from "./util/RestManager.js"
-import {SetupPage1} from "./setuppages/SetupPage1.js"
+import {SetupPage1} from "./setuppages/pages/SetupPage1.js"
+import {SetupPage2} from "./setuppages/pages/SetupPage2.js"
+import {SetupPage3} from "./setuppages/pages/SetupPage3.js"
 
 class App extends React.Component{
 
     constructor(props) {
         super(props);
-        this.state = {time: new Date().toLocaleTimeString(), title:"Home", setupHidden:true, menuHidden:true, currentURL: "/homepage.html"};
+        this.state = {time: new Date().toLocaleTimeString(), title:"Home", setupHidden:true, menuHidden:true,
+                      currentURL: "/homepage.html", setupPage: 0};
         this.checkForSetup();
     }
 
@@ -41,12 +44,20 @@ class App extends React.Component{
         this.setState({menuHidden: !this.state.menuHidden});
     }
 
-    closeSetup = () => {
+    finishSetup = () => {
+        restRequest("/greenlake-platform/setup/finish", "POST", "", this.onFinishSetupSuccess);
+    }
+
+    onFinishSetupSuccess = (responseText) => {
         this.setState({setupHidden: true});
     }
 
     setContentURL = (url, title) => {
         this.setState({currentURL: url, menuHidden: true, title: title})
+    }
+
+    setSetupPage = (index) => {
+        this.setState({setupPage: index});
     }
 
     render(){
@@ -61,10 +72,19 @@ class App extends React.Component{
                     <MainMenu contentUrlCommand={this.setContentURL} visibility={this.state.menuHidden}/>
                     <iframe src={this.state.currentURL} style={{border: "0px", width: "100%", height: "100%",
                         overflow: "auto"}} />
-                    <Window width={500} height={300} title="Setup" visibility={this.state.setupHidden ? "hidden"
-                        : "visible"} closeCommand={this.closeSetup}>
-                        <SetupPage1 />
-                    </Window>
+
+                    {!this.state.setupHidden &&
+                        <Window width={500} height={300} title="Setup" closeCommand={this.closeSetup} closable={false}>
+                            {this.state.setupPage === 0 && <SetupPage1 nextAction={() => this.setSetupPage(1)}/>}
+                            {this.state.setupPage === 1 &&
+                                <SetupPage2 nextAction={() => this.setSetupPage(2)}
+                                 previousAction={() => this.setSetupPage(0)} />
+                            }
+                            {this.state.setupPage === 2 &&
+                                <SetupPage3 previousAction={() => this.setSetupPage(1)} nextAction={this.finishSetup}/>
+                            }
+                        </Window>
+                    }
                 </div>
             </div>
         )

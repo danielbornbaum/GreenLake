@@ -95,13 +95,18 @@ button{
     background-color: #32a63b;
 }
 
-button:disabled{
+button::disabled{
     background-color: #b9dbbc;
     color: #fff;
+    cursor: default;
 }
 
 button:hover{
     background-color: #3bc446;
+}
+
+button:disabled:hover{
+    background-color: #b9dbbc;
 }
 
 .home-background{
