@@ -289,30 +289,44 @@ public class StandardGreenhouseData implements IGreenhouseData {
             data.setTempSensValue2(tempInside);
 
             //Set Brightness DONE
-            if(data.getTime().isBefore(month.sunrise) || data.getTime().isAfter(month.sunset)) {
-                brightness = 0;
-            }
-            else if(rain) {
-                brightness = 20 + random.nextInt(15);
-            }
-            else if(data.getTime().minusMinutes(80).isBefore(month.sunrise) || data.getTime().plusMinutes(80).isAfter(month.sunset) ) {
+            if(data.getTime().minusMinutes(80).isBefore(month.sunrise) || data.getTime().plusMinutes(80).isAfter(month.sunset)) {
                 dawn = true;
             }
             else {
                 dawn = false;
             }
 
-            if(!dawn && (leftNormalEntries == brightEntries || (!rain && !fog && brightEntries > 0 && generateWeightedDecision(0.65)))) {
-                brightness = 85 + random.nextInt(15);
+            if(data.getTime().isBefore(month.sunrise) || data.getTime().isAfter(month.sunset)) {
+                brightness = 0;
+            }
+            else if(rain) {
+                if(dawn && brightness < 20 && entry < noon) {
+                    brightness = brightness + (float) Math.random() * 3;
+                }
+                else {
+                    brightness = 20 + random.nextInt(15) + (float) Math.random();
+                }
+            }
+            else if(dawn && entry < noon && brightness < 60) {
+                brightness = brightness + (float) Math.random() * 8;
+            }
+            else if (dawn && entry > noon) {
+                brightness = brightness - (float) Math.random() * 8;
+                if(brightness < 0) {
+                    brightness = 0;
+                }
+            }
+            else if((leftNormalEntries == brightEntries || (!rain && !fog && brightEntries > 0 && generateWeightedDecision(0.65)))) {
+                brightness = 85 + random.nextInt(15) + (float) Math.random();
                 brightEntries--;
             }
             else {
-                brightness = brightness - 5 + random.nextInt(10);
-                if (brightness > 83) {
-                    brightness = 82;
+                brightness = brightness - 5 + random.nextInt(10) + (float) Math.random();
+                if (brightness > 80) {
+                    brightness = 80 + (float) Math.random();
                 }
                 else if (brightness < 40) {
-                    brightness = 41;
+                    brightness = 40 + (float) Math.random();
                 }
             }
             data.setBrightnessSensValue(brightness);
@@ -328,9 +342,9 @@ public class StandardGreenhouseData implements IGreenhouseData {
                 } else {
                     humidityOutside = humidityOutside - 3 + (float) Math.random() * 6;
                     if (humidityOutside < 70) {
-                        humidityOutside = 70;
+                        humidityOutside = 70 + (float) Math.random();
                     } else if (humidityOutside > 90) {
-                        humidityOutside = 90;
+                        humidityOutside = 90 + (float) Math.random();
                     }
                 }
             }
@@ -339,7 +353,7 @@ public class StandardGreenhouseData implements IGreenhouseData {
                     humidityOutside = humidityOutside - (float) Math.random() * 5;
                 }
                 else if (humidityOutside < 40) {
-                    humidityOutside = 41;
+                    humidityOutside = 40 + (float) Math.random();
                 }
                 else {
                     humidityOutside = humidityOutside - 2 + (float) Math.random() * 4;
@@ -347,7 +361,7 @@ public class StandardGreenhouseData implements IGreenhouseData {
             }
             else if (month.season == Season.WINTER && brightness > 70) {
                 if (humidityOutside > 85) {
-                    humidityOutside = 84;
+                    humidityOutside = 84 + + (float) Math.random();
                 }
                 else if (humidityOutside < 70) {
                     humidityOutside = humidityOutside + (float) Math.random() * 5;
@@ -378,11 +392,19 @@ public class StandardGreenhouseData implements IGreenhouseData {
             }
 
             if(ventilate) {
+                float factor = (float) 0.3;
                 if(rain) {
                     humidityInside = humidityInside - (float) Math.random() * 2;
                 }
                 else {
                     humidityInside = humidityInside - (float) Math.random() * 4;
+                    factor = (float) 0.6;
+                }
+                if(tempDifference - factor > 0) {
+                    data.setTempSensValue2(data.getTempSensValue2() + (float) Math.random() * factor);
+                }
+                else if(tempDifference + factor < 0) {
+                    data.setTempSensValue2(data.getTempSensValue2() - (float) Math.random() * factor);
                 }
             }
             else {
@@ -392,6 +414,9 @@ public class StandardGreenhouseData implements IGreenhouseData {
 
             day.add(data);
             lastInstance = data;
+            if(!fog && !rain) {
+                leftNormalEntries--;
+            }
         }
 
         return new Pair<>(day, monthRainDays);
