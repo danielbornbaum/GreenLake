@@ -12,12 +12,9 @@ export class Window extends React.Component{
 
         this.style = {
             width: this.props.width,
-            maxWidth: "100%",
             height: this.props.height,
             top: pos_y,
             left: pos_x,
-            backgroundColor: "#FFF",
-            overflow: "hidden"
         };
 
         this.state = {hidden: false};
@@ -30,12 +27,13 @@ export class Window extends React.Component{
                 <Draggable handle="span">
                     <div className="window" style={this.style}>
                         <span className="window-title">{this.props.title}
-                            <div className="x-button-container" onClick={this.props.closeCommand}>
-                                <div className="x-button" onClick={this.props.closeCommand}/>
-                            </div>
+                            {this.props.closable &&
+                                <div className="x-button-container" onClick={this.props.closeCommand}>
+                                    <div className="x-button" onClick={this.props.closeCommand}/>
+                                </div>
+                            }
                         </span>
-                        <div className="window-content" draggable
-                         onDragStart={e => {e.preventDefault(); e.stopPropagation();}} >{this.props.children}</div>
+                        <div className="window-content" draggable>{this.props.children}</div>
                     </div>
                 </Draggable>
             </div>

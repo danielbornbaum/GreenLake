@@ -19,6 +19,7 @@
             <plugin>
                 <configuration>
                     <warName>${project.artifactId}</warName>
+                    <attachClasses>true</attachClasses>
                 </configuration>
 
                 <artifactId>maven-war-plugin</artifactId>
@@ -53,6 +54,18 @@
             <groupId>org.rauschig</groupId>
             <artifactId>jarchivelib</artifactId>
             <version>0.7.1</version>
+        </dependency>
+        <dependency>
+            <groupId>de.dhbw</groupId>
+            <artifactId>greenlake-dependencies</artifactId>
+            <version>1.0-SNAPSHOT</version>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>javax</groupId>
+            <artifactId>javaee-api</artifactId>
+            <version>8.0.1</version>
+            <scope>compile</scope>
         </dependency>
     </dependencies>
 

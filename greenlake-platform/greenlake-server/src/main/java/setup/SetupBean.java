@@ -1,7 +1,10 @@
 package setup;
 
+import org.apache.commons.io.FileUtils;
+import org.json.JSONObject;
 import org.rauschig.jarchivelib.Archiver;
 import org.rauschig.jarchivelib.ArchiverFactory;
+import settings.SettingsManager;
 
 import javax.ejb.Stateless;
 import java.io.File;
@@ -44,14 +47,14 @@ public abstract class SetupBean<T>
 
             if (contentLength <= 0)
             {
-                throw new IOException(String.format("Content length of %s download was %d", getNameOfInstallationGoal(),
-                                                    contentLength));
+                throw new IOException(String.format("Größe der %s-Installation war %d. Keine Daten.",
+                                                    getNameOfInstallationGoal(), contentLength));
             }
 
             InputStream webInputStream = connection.getInputStream();
 
             StringBuilder pathToDownload = new StringBuilder();
-            pathToDownload.append(path);
+            pathToDownload.append(path.replace("\\", "/"));
 
             if (!pathToDownload.toString().endsWith("/"))
             {
@@ -60,14 +63,22 @@ public abstract class SetupBean<T>
 
             String pathToDownloadFile = pathToDownload.toString().concat("download.tgz");
 
-            File downloadFile = new File(pathToDownloadFile);
-            boolean mkdirs = downloadFile.getParentFile().mkdirs();
-            boolean created = downloadFile.createNewFile();
-
-            if (!created || !mkdirs)
+            if (!new File(pathToDownload.toString()).exists())
             {
-                throw new IOException(
-                        "Could not create file. Maybe it already exists and is not empty or you path is invalid.");
+                File downloadFile = new File(pathToDownloadFile);
+                boolean mkdirs = downloadFile.getParentFile().mkdirs();
+
+                if (!mkdirs)
+                {
+                    throw new IOException("Konnte kein Verzeichnis erstellen, vielleicht ist der Pfad invalide?");
+                }
+
+                boolean created = downloadFile.createNewFile();
+
+                if (!created)
+                {
+                    throw new IOException("Konnte die Datei nicht erstellen.");
+                }
             }
 
             FileOutputStream outputStream = new FileOutputStream(pathToDownloadFile);
@@ -110,7 +121,8 @@ public abstract class SetupBean<T>
                 if (!file.renameTo(new File(pathToDownload.toString().concat(file.getName()))))
                 {
                     throw new IOException(
-                            String.format("Could not move files for %ss installation", getNameOfInstallationGoal()));
+                            String.format("Dateien für %ss Installation konnten nicht verschoben werden.",
+                                          getNameOfInstallationGoal()));
                 }
             }
 
@@ -122,14 +134,15 @@ public abstract class SetupBean<T>
         }
         else
         {
-            throw new IOException(String.format("Response Code was %d", connection.getResponseCode()));
+            throw new IOException(String.format("Response code war %d", connection.getResponseCode()));
         }
     }
 
-    public boolean validateFolder(String pathToFolder, String pathToHashFile)
+    public boolean validateFolder(String pathToFolder, String hashSetting) throws IOException
     {
-        hashFoldersRecursively(pathToFolder);
-        return false;
+        pathToFolder = pathToFolder.replace("\\", "/");
+        String folderHash = hashFoldersRecursively(pathToFolder);
+        return SettingsManager.getInstance().getSetting(hashSetting).equals(folderHash);
     }
 
     public int getProgress()
@@ -140,6 +153,29 @@ public abstract class SetupBean<T>
             return 100;
         }
         return progress;
+    }
+
+    public void setProperties(JSONObject properties, File configFile) throws IOException
+    {
+        String fileContent = FileUtils.readFileToString(configFile, "UTF-8");
+
+        LOGGER.info("\n\n---\n"
+                            .concat("Replacing ")
+                            .concat(getNameOfInstallationGoal()).concat(" Configuration. Old config:")
+                            .concat("\n\n")
+                            .concat(fileContent)
+                            .concat("\n\n---\n"));
+
+        for (String requiredProperty : properties.keySet())
+        {
+            String pattern = requiredProperty.concat("=.*\n");
+            String replacement = requiredProperty.concat("=").concat(String.valueOf(properties.get(requiredProperty)))
+                    .concat("\n");
+
+            fileContent = fileContent.replaceAll(pattern, replacement);
+        }
+
+        FileUtils.writeStringToFile(configFile, fileContent, "UTF-8");
     }
 
     private String hashFoldersRecursively(String path)
@@ -168,7 +204,6 @@ public abstract class SetupBean<T>
             hashBuilder.append(file.getName().hashCode());
         }
 
-        LOGGER.info("HASH CODE INCOMING: " + hashBuilder.toString());
         return hashBuilder.toString();
     }
 }

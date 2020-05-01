@@ -1,4 +1,4 @@
-package rest.util;
+package util;
 
 public class HTTPStatusCodes
 {

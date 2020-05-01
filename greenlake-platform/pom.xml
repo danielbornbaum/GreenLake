@@ -21,6 +21,7 @@
         <module>greenlake-ear</module>
         <module>greenlake-server</module>
         <module>greenlake-react-war</module>
+        <module>greenlake-dependencies</module>
     </modules>
 
 </project>

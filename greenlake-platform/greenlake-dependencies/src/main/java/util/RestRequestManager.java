@@ -1,8 +1,9 @@
-package rest.util;
+package util;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import javax.ejb.Stateful;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.io.PrintWriter;
@@ -10,6 +11,7 @@ import java.io.StringWriter;
 import java.util.function.Consumer;
 import java.util.logging.Logger;
 
+@Stateful
 public class RestRequestManager extends JSONObject
 {
     private String message = "{}";
@@ -44,24 +46,27 @@ public class RestRequestManager extends JSONObject
 
     public RestRequestManager assertKeys(String[] keys)
     {
-        StringBuilder missingKeys = new StringBuilder();
-
-        for (String key : keys)
+        if (successful)
         {
-            if (!has(key))
+            StringBuilder missingKeys = new StringBuilder();
+
+            for (String key : keys)
             {
-                if (!"".equals(missingKeys.toString()))
+                if (!has(key))
                 {
-                    missingKeys.append(", ");
+                    if (!"".equals(missingKeys.toString()))
+                    {
+                        missingKeys.append(", ");
+                    }
+                    missingKeys.append(key);
                 }
-                missingKeys.append(key);
             }
-        }
 
-        if (!"".equals(missingKeys.toString()))
-        {
-            setError(HTTPStatusCodes.CLIENT_ISSUES.BAD_REQUEST,
-                     "Your request is missing this/those key(s): " + missingKeys.toString(), false);
+            if (!"".equals(missingKeys.toString()))
+            {
+                setError(HTTPStatusCodes.CLIENT_ISSUES.BAD_REQUEST,
+                         "Your request is missing this/those key(s): " + missingKeys.toString(), false);
+            }
         }
 
         return this;
@@ -77,7 +82,8 @@ public class RestRequestManager extends JSONObject
             }
             catch (Exception e)
             {
-                setError(HTTPStatusCodes.SERVER_ISSUES.INTERNAL_SERVER_ERROR, "A server side exception occured", false);
+                setError(HTTPStatusCodes.SERVER_ISSUES.INTERNAL_SERVER_ERROR,
+                         "Ein serverseitiger Fehler ist aufgetreten", false);
 
                 StringWriter sw = new StringWriter();
                 e.printStackTrace(new PrintWriter(sw));
@@ -88,29 +94,34 @@ public class RestRequestManager extends JSONObject
         return this;
     }
 
-    public void setCustomSuccessCode(HTTPStatusCodes.SUCCESS_CODES successCode)
+    public RestRequestManager setCustomSuccessCode(HTTPStatusCodes.SUCCESS_CODES successCode)
     {
         statusCode = successCode.getCode();
+        return this;
     }
 
-    public void setCustomError(HTTPStatusCodes.CLIENT_ISSUES issueCode, String message, boolean log)
+    public RestRequestManager setCustomError(HTTPStatusCodes.CLIENT_ISSUES issueCode, String message, boolean log)
     {
         setError(issueCode, message, log);
+        return this;
     }
 
-    public void setCustomError(HTTPStatusCodes.CLIENT_ISSUES issueCode, String message)
+    public RestRequestManager setCustomError(HTTPStatusCodes.CLIENT_ISSUES issueCode, String message)
     {
         setError(issueCode, message, false);
+        return this;
     }
 
-    public void setCustomError(HTTPStatusCodes.SERVER_ISSUES issueCode, String message, boolean log)
+    public RestRequestManager setCustomError(HTTPStatusCodes.SERVER_ISSUES issueCode, String message, boolean log)
     {
         setError(issueCode, message, log);
+        return this;
     }
 
-    public void setCustomError(HTTPStatusCodes.SERVER_ISSUES issueCode, String message)
+    public RestRequestManager setCustomError(HTTPStatusCodes.SERVER_ISSUES issueCode, String message)
     {
         setError(issueCode, message, false);
+        return this;
     }
 
     public RestRequestManager setMessage(JSONObject message)
