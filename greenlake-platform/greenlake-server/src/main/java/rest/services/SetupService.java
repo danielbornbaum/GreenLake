@@ -17,7 +17,6 @@ import javax.ws.rs.Path;
 import javax.ws.rs.core.Response;
 import java.io.File;
 import java.io.IOException;
-import java.util.Objects;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -280,16 +279,21 @@ public class SetupService
                             return;
                         }
 
-                        if (Objects.requireNonNull(dir.list()).length > 0)
+                        String[] folderList = dir.list();
+
+                        if (folderList != null)
                         {
-                            restRequestManager.setCustomError(new LoggedClientCompatibleException(
-                                    new IllegalStateException(
-                                            String.format(
-                                                    "A client requested an installation with %s. But %s is not empty",
-                                                    component.getSimpleName(), dir.getAbsolutePath())),
-                                    "Das angegebene Verzeichnis ist nicht leer\"",
-                                    HTTPStatusCodes.CLIENT_ISSUES.CONFLICT, LOGGER, Level.FINE));
-                            return;
+                            if (folderList.length > 0)
+                            {
+                                restRequestManager.setCustomError(new LoggedClientCompatibleException(
+                                        new IllegalStateException(
+                                                String.format(
+                                                        "A client requested an installation with %s. But %s is not empty",
+                                                        component.getSimpleName(), dir.getAbsolutePath())),
+                                        "Das angegebene Verzeichnis ist nicht leer\"",
+                                        HTTPStatusCodes.CLIENT_ISSUES.CONFLICT, LOGGER, Level.FINE));
+                                return;
+                            }
                         }
                     }
 

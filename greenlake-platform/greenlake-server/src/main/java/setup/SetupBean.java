@@ -185,6 +185,9 @@ public abstract class SetupBean
         return SettingsManager.getInstance().getSetting(hashSetting).equals(folderHash);
     }
 
+    /**
+     * @return progress of the installation
+     */
     public int getProgress()
     {
         if (progress == 100)
