@@ -15,6 +15,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.nio.file.Files;
 import java.nio.file.InvalidPathException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -140,8 +141,7 @@ public abstract class SetupBean
                         String.format("Could not delete tar file for %ss installation", getNameOfInstallationGoal()));
             }
 
-            File installationSubDir = Objects
-                    .requireNonNull(new File(path).listFiles(File::isDirectory))[0];
+            File installationSubDir = ((Path) Files.list(Paths.get(path)).toArray()[0]).toFile();
             File[] installationFiles = Objects.requireNonNull(installationSubDir.listFiles());
 
             for (File file : installationFiles)
