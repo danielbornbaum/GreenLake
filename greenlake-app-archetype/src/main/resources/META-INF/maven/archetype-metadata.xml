@@ -18,11 +18,20 @@
         </module>
         <module id="${rootArtifactId}-react-war" dir="__rootArtifactId__-react-war" name="${rootArtifactId}-react-war">
             <fileSets>
+                <fileSet encoding="UTF-8">
+                    <directory>src/main/webapp/images</directory>
+                    <includes>
+                        <include>**/**</include>
+                    </includes>
+                </fileSet>
                 <fileSet filtered="true" packaged="false" encoding="UTF-8">
                     <directory>/</directory>
                     <includes>
                         <include>**/**</include>
                     </includes>
+                    <excludes>
+                        <exclude>src/main/webapp/images/**</exclude>
+                    </excludes>
                 </fileSet>
             </fileSets>
         </module>
