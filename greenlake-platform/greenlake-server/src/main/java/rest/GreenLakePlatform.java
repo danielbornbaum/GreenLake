@@ -9,10 +9,16 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 
+/**
+ * JAX-RS REST-Application that provides the backend for this application
+ */
 @ApplicationPath("")
 public class GreenLakePlatform extends Application
 {
 
+    /**
+     * @return set of jax-rs webservice relevant classes
+     */
     @Override
     public Set<Class<?>> getClasses()
     {

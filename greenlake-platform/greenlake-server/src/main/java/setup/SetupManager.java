@@ -4,17 +4,29 @@ import org.apache.commons.io.FileUtils;
 import org.json.JSONException;
 import org.json.JSONObject;
 import settings.SettingsManager;
+import util.LoggedClientCompatibleException;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.logging.Logger;
 
+/**
+ * Class that manages the setup
+ */
 public class SetupManager
 {
     private static boolean performed = false;
     private static Logger LOGGER = Logger.getLogger(SetupManager.class.getName());
 
-    public static boolean isPerformed() throws IOException
+    /**
+     * detects if the setup is performed
+     *
+     * @return whether the setup has been performed
+     * @throws IOException thrown by checking if the setup is performed due to file accesses
+     * @throws LoggedClientCompatibleException thrown by checking if the setup is performed due to validating
+     *         the folders where components are installed
+     */
+    public static boolean isPerformed() throws IOException, LoggedClientCompatibleException
     {
         if (!performed)
         {
@@ -23,7 +35,14 @@ public class SetupManager
         return performed;
     }
 
-    private static void checkPerformed() throws IOException
+    /**
+     * check if the setup is performed given that files meet a certain condition
+     *
+     * @throws IOException
+     * @throws LoggedClientCompatibleException thrown by checking if the setup is performed due to validating
+     *         the folders where components are installed
+     */
+    private static void checkPerformed() throws IOException, LoggedClientCompatibleException
     {
         File configFile = new File(System.getProperty("jboss.server.config.dir")
                                            .concat("/greenlake/greenlake-properties.json"));
@@ -46,7 +65,6 @@ public class SetupManager
         {
             LOGGER.severe("Could not read configFile: \n".concat(exception.getLocalizedMessage()));
             performed = false;
-            renameOldFile();
             return;
         }
 
@@ -54,7 +72,6 @@ public class SetupManager
         {
             LOGGER.severe("ConfigFile is missing configurations");
             performed = false;
-            renameOldFile();
             return;
         }
 
@@ -63,7 +80,6 @@ public class SetupManager
         {
             LOGGER.severe("No valid Kafka installation found at configured location");
             performed = false;
-            renameOldFile();
             return;
         }
 
@@ -71,7 +87,6 @@ public class SetupManager
         {
             LOGGER.severe("No valid Hadoop installation found at configured location");
             performed = false;
-            renameOldFile();
             return;
         }
 
@@ -80,10 +95,5 @@ public class SetupManager
                 .setSetting("pathToHadoop", configJSON.getString("pathToHadoop"), true);
 
         performed = true;
-    }
-
-    private static void renameOldFile()
-    {
-        LOGGER.warning("\tFile will be renamed and setup has to be performed again");
     }
 }

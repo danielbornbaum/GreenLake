@@ -11,6 +11,9 @@ import java.io.StringWriter;
 import java.util.function.Consumer;
 import java.util.logging.Logger;
 
+/**
+ * Class to manage REST requests with
+ */
 @Stateful
 public class RestRequestManager extends JSONObject
 {
@@ -20,11 +23,20 @@ public class RestRequestManager extends JSONObject
 
     private int statusCode = HTTPStatusCodes.SUCCESS_CODES.OK.getCode();
 
+    /**
+     * Sets a default value for the request parameters
+     */
     public RestRequestManager()
     {
         super("{}");
     }
 
+    /**
+     * Set parameters from the rest call to this RestRequestManager given as JSON
+     *
+     * @param parameters in json format
+     * @return this object for builder pattern
+     */
     public RestRequestManager setParameters(String parameters)
     {
         keySet().forEach(this::remove);
@@ -36,7 +48,8 @@ public class RestRequestManager extends JSONObject
         }
         catch (JSONException e)
         {
-            setError(HTTPStatusCodes.CLIENT_ISSUES.BAD_REQUEST, "No valid JSON given", false);
+            setCustomError(new LoggedClientCompatibleException(e, "Ihrer Anfrage enthielt kein valides JSON",
+                                                               HTTPStatusCodes.CLIENT_ISSUES.BAD_REQUEST, LOGGER));
             return this;
         }
 
@@ -44,6 +57,12 @@ public class RestRequestManager extends JSONObject
         return this;
     }
 
+    /**
+     * Asserts that keys are present in request throws error otherwise
+     *
+     * @param keys keys to validate
+     * @return this object for builder pattern
+     */
     public RestRequestManager assertKeys(String[] keys)
     {
         if (successful)
@@ -64,14 +83,25 @@ public class RestRequestManager extends JSONObject
 
             if (!"".equals(missingKeys.toString()))
             {
-                setError(HTTPStatusCodes.CLIENT_ISSUES.BAD_REQUEST,
-                         "Your request is missing this/those key(s): " + missingKeys.toString(), false);
+                setCustomError(new LoggedClientCompatibleException(new IllegalStateException(String.format(
+                        "A client started the following request, missing this/these key(s) '%s': \n\t %s",
+                        missingKeys.toString(),
+                        toString())), "Ihrer Anfrage fehlen der/die folgende(n) Parameter: "
+                                                                           .concat(missingKeys.toString()),
+                                                                   HTTPStatusCodes.CLIENT_ISSUES.BAD_REQUEST, LOGGER));
             }
         }
 
         return this;
     }
 
+    /**
+     * executes code only if the previous steps in the constructor pattern evaluated to successful (asserting keys
+     * etc.)
+     *
+     * @param consumer element that contains the code, gets this object for reference
+     * @return this object for builder pattern purposes
+     */
     public RestRequestManager execute(Consumer<RestRequestManager> consumer)
     {
         if (successful)
@@ -82,8 +112,7 @@ public class RestRequestManager extends JSONObject
             }
             catch (Exception e)
             {
-                setError(HTTPStatusCodes.SERVER_ISSUES.INTERNAL_SERVER_ERROR,
-                         "Ein serverseitiger Fehler ist aufgetreten", false);
+                setCustomError(new LoggedClientCompatibleException(e, LOGGER));
 
                 StringWriter sw = new StringWriter();
                 e.printStackTrace(new PrintWriter(sw));
@@ -94,36 +123,38 @@ public class RestRequestManager extends JSONObject
         return this;
     }
 
+    /**
+     * Sets a custom success code for the rest request other than 200
+     *
+     * @param successCode
+     * @return
+     */
     public RestRequestManager setCustomSuccessCode(HTTPStatusCodes.SUCCESS_CODES successCode)
     {
         statusCode = successCode.getCode();
         return this;
     }
 
-    public RestRequestManager setCustomError(HTTPStatusCodes.CLIENT_ISSUES issueCode, String message, boolean log)
+    /**
+     * Set a custom error other than 500
+     *
+     * @param exception exception that occured as LoggedClientCompatibleException
+     * @return this object for builder pattern purposes
+     */
+    public RestRequestManager setCustomError(LoggedClientCompatibleException exception)
     {
-        setError(issueCode, message, log);
+        successful = false;
+        statusCode = exception.getStatusCode().getCode();
+        message = new JSONObject().put("message", exception.getClientMessage()).toString();
         return this;
     }
 
-    public RestRequestManager setCustomError(HTTPStatusCodes.CLIENT_ISSUES issueCode, String message)
-    {
-        setError(issueCode, message, false);
-        return this;
-    }
-
-    public RestRequestManager setCustomError(HTTPStatusCodes.SERVER_ISSUES issueCode, String message, boolean log)
-    {
-        setError(issueCode, message, log);
-        return this;
-    }
-
-    public RestRequestManager setCustomError(HTTPStatusCodes.SERVER_ISSUES issueCode, String message)
-    {
-        setError(issueCode, message, false);
-        return this;
-    }
-
+    /**
+     * set message that is delivered to the client, if the rest request manager evaluates to successful
+     *
+     * @param message message to send to the client
+     * @return this object for builder pattern purposes
+     */
     public RestRequestManager setMessage(JSONObject message)
     {
         if (successful)
@@ -138,20 +169,11 @@ public class RestRequestManager extends JSONObject
         return this;
     }
 
+    /**
+     * @return javax Response object for this rest request, can be returned by the jax-rs method
+     */
     public Response generateResponse()
     {
         return Response.status(statusCode).header("Content-Type", MediaType.APPLICATION_JSON).entity(message).build();
-    }
-
-    private void setError(HTTPStatusCodes.Codes code, String message, boolean log)
-    {
-        successful = false;
-        statusCode = code.getCode();
-        this.message = new JSONObject().put("message", message).toString();
-
-        if (log)
-        {
-            LOGGER.severe(String.format("%d: %s", code.getCode(), message));
-        }
     }
 }

@@ -1,13 +1,16 @@
 package util;
 
+/**
+ * Constant class of useful http codes
+ */
 public class HTTPStatusCodes
 {
-    public static interface Codes
+    public interface Codes
     {
-        public int getCode();
+        int getCode();
     }
 
-    public static enum SUCCESS_CODES implements Codes
+    public enum SUCCESS_CODES implements Codes
     {
         OK(200),
         CREATED(201),
@@ -29,7 +32,7 @@ public class HTTPStatusCodes
         }
     }
 
-    public static enum CLIENT_ISSUES implements Codes
+    public enum CLIENT_ISSUES implements Codes
     {
         BAD_REQUEST(400),
         UNAUTHORIZED(401),
@@ -54,7 +57,7 @@ public class HTTPStatusCodes
         }
     }
 
-    public static enum SERVER_ISSUES implements Codes
+    public enum SERVER_ISSUES implements Codes
     {
         INTERNAL_SERVER_ERROR(500),
         NOT_IMPLEMENTED(501);
