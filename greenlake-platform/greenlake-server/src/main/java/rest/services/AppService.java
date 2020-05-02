@@ -6,7 +6,6 @@ import util.HTTPStatusCodes;
 import util.LoggedClientCompatibleException;
 import util.RestRequestManager;
 
-import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
@@ -76,7 +75,7 @@ public class AppService
      * @param parameters a request in json format with key 'appId'
      * @return status code 200 and empty body or error code and error message
      */
-    @DELETE
+    @POST
     @Path("/unregister")
     public Response unregisterApp(String parameters)
     {
