@@ -10,9 +10,14 @@ import javax.management.ObjectName;
 import javax.ws.rs.client.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import java.io.IOException;
+import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.lang.management.ManagementFactory;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.util.logging.Logger;
 
 /**
@@ -45,9 +50,9 @@ public class LifeCycleBean
                                           "jboss.as:socket-binding-group=standard-sockets,socket-binding=http"),
                                   "port");
             //http adress
-            address = String.valueOf(ManagementFactory.getPlatformMBeanServer()
-                                             .getAttribute(new ObjectName("jboss.as:interface=public"),
-                                                           "inet-address"));
+            address = "http://".concat(String.valueOf(ManagementFactory.getPlatformMBeanServer()
+                                                              .getAttribute(new ObjectName("jboss.as:interface=public"),
+                                                                            "inet-address")));
             //port offset
             port += (int) ManagementFactory.getPlatformMBeanServer()
                     .getAttribute(new ObjectName(
@@ -56,7 +61,7 @@ public class LifeCycleBean
         }
         catch (Exception e)
         {
-            failDeployment(e);
+            //failDeployment(e);
         }
     }
 
@@ -68,23 +73,47 @@ public class LifeCycleBean
     @SuppressWarnings("unused")
     public void postConstruct()
     {
-        Client client = ClientBuilder.newClient();
-        WebTarget webTarget
-                = client.target(String.format("%s:%d/greenlake-platform/apps/register", address, port));
-        Invocation.Builder invocationBuilder
-                = webTarget.request(MediaType.APPLICATION_JSON);
-        Response response
-                = invocationBuilder.post(Entity.json(
-                new JSONObject().put("appId", appId)
-                        .put("orderNumber", orderNumber)
-                        .put("name", name)
-                        .put("iconPath", iconPath)
-                        .put("url", url)));
+        HttpURLConnection conn = null;
 
-        if (response.getStatus() != 200)
+        try
         {
-            failDeployment(new IllegalStateException(
-                    "Response code from app registration service was ".concat(String.valueOf(response.getStatus()))));
+            URL url = new URL(String.format("%s:%d/greenlake-platform/apps/register", address, port));
+
+            conn = (HttpURLConnection) url.openConnection();
+            conn.setDoInput(true);
+            conn.setDoOutput(true);
+            conn.setRequestMethod("POST");
+            conn.setRequestProperty("Accept", "application/json");
+
+            OutputStreamWriter writer = new OutputStreamWriter(conn.getOutputStream(), StandardCharsets.UTF_8);
+            writer.write(new JSONObject()
+                                 .put("appId", appId)
+                                 .put("orderNumber", orderNumber)
+                                 .put("name", name)
+                                 .put("iconPath", iconPath)
+                                 .put("url", LifeCycleBean.url)
+                                 .toString());
+            writer.close();
+
+            if (conn.getResponseCode() / 100 != 2)
+            {
+                failDeployment(new IllegalStateException(String.format(
+                        "The app registration service responded with code %d. Message: %s",
+                        conn.getResponseCode(), new String(conn.getInputStream().readAllBytes()))));
+            }
+
+            LOGGER.info("\n\n\nRegistered app Kafka Configuration");
+        }
+        catch (IOException e)
+        {
+            failDeployment(e);
+        }
+        finally
+        {
+            if (conn != null)
+            {
+                conn.disconnect();
+            }
         }
     }
 
@@ -102,19 +131,38 @@ public class LifeCycleBean
     @PreDestroy
     public void preDestroy()
     {
-        Client client = ClientBuilder.newClient();
-        WebTarget webTarget
-                = client.target(String.format("%s:%d/greenlake-platform/apps/unregister", address, port));
-        Invocation.Builder invocationBuilder
-                = webTarget.request(MediaType.APPLICATION_JSON);
-        Response response
-                = invocationBuilder.post(Entity.json(
-                new JSONObject().put("appId", appId)));
+        HttpURLConnection conn = null;
 
-        if (response.getStatus() / 100 != 2)
+        try
         {
-            LOGGER.warning("Could not unregister app, because service responded: "
-                                   .concat(new JSONObject(response.getEntity().toString()).getString("message")));
+            URL url = new URL(String.format("%s:%d/greenlake-platform/apps/unregister", address, port));
+
+            conn = (HttpURLConnection) url.openConnection();
+            conn.setDoInput(true);
+            conn.setDoOutput(true);
+            conn.setRequestMethod("DELETE");
+            conn.setRequestProperty("Accept", "application/json");
+
+            OutputStreamWriter writer = new OutputStreamWriter(conn.getOutputStream(), StandardCharsets.UTF_8);
+            writer.write(new JSONObject()
+                                 .put("appId", appId)
+                                 .toString());
+            writer.close();
+
+            if (conn.getResponseCode() / 100 != 2)
+            {
+                throw new IllegalStateException(
+                        String.format("Could not unregister the app. Response code was %d. Message: %s",
+                                      conn.getResponseCode(), new String(conn.getInputStream().readAllBytes())));
+            }
+        }
+        catch (IOException e)
+        {
+            StringWriter sw = new StringWriter();
+            e.printStackTrace(new PrintWriter(sw));
+            String exceptionAsString = sw.toString();
+
+            LOGGER.severe("Could not unregister app: \n".concat(sw.toString()));
         }
     }
 }
