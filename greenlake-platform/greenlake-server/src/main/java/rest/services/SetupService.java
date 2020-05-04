@@ -7,6 +7,7 @@ import setup.KafkaSetupBean;
 import setup.SetupBean;
 import setup.SetupManager;
 import util.HTTPStatusCodes;
+import util.LoggedClientCompatibleException;
 import util.RestRequestManager;
 
 import javax.ws.rs.GET;
@@ -16,17 +17,21 @@ import javax.ws.rs.Path;
 import javax.ws.rs.core.Response;
 import java.io.File;
 import java.io.IOException;
-import java.io.PrintWriter;
-import java.io.StringWriter;
-import java.util.Objects;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
+/**
+ * Deals with the setup of this application
+ */
 @Path("/setup")
 public class SetupService
 {
     private static final Logger LOGGER = Logger.getLogger(SetupService.class.getName());
     private JSONObject config = new JSONObject();
 
+    /**
+     * @return whether the setup was performed based on the existence a valid configuration file
+     */
     @GET
     @Path("/status")
     public Response status()
@@ -38,16 +43,24 @@ public class SetupService
                         restRequestManager
                                 .setMessage(new JSONObject().put("performed", SetupManager.isPerformed()));
                     }
-                    catch (IOException e)
+                    catch (IOException | LoggedClientCompatibleException e)
                     {
-                        restRequestManager.setCustomError(HTTPStatusCodes.SERVER_ISSUES.INTERNAL_SERVER_ERROR,
-                                                          "Ein serverseitiger Fehler ist aufgetreten");
-                        LOGGER.severe(e.getLocalizedMessage());
+                        if (e instanceof LoggedClientCompatibleException)
+                        {
+                            restRequestManager.setCustomError((LoggedClientCompatibleException) e);
+                        }
+                        restRequestManager.setCustomError(new LoggedClientCompatibleException(e, LOGGER));
                     }
                 })
                 .generateResponse();
     }
 
+    /**
+     * Interface to install Apache Kafka
+     *
+     * @param parameters a json request with parameter 'path'
+     * @return code 200 or error code and error message
+     */
     @PUT
     @Path("/installKafka")
     public Response installKafka(String parameters)
@@ -55,6 +68,12 @@ public class SetupService
         return installComponent(KafkaSetupBean.class, parameters);
     }
 
+    /**
+     * Interface to install Apache Hadoop
+     *
+     * @param parameters a json request with parameter 'path'
+     * @return code 200 or error code and error message
+     */
     @PUT
     @Path("/installHadoop")
     public Response installHadoop(String parameters)
@@ -62,6 +81,11 @@ public class SetupService
         return installComponent(HadoopSetupBean.class, parameters);
     }
 
+    /**
+     * Interface to get the kafka setup progress
+     *
+     * @return Kakfa setup progress in format {progress: int} (percentage) or error code and message
+     */
     @GET
     @Path("/kafkaSetupProgress")
     public Response kafkaStatus()
@@ -69,6 +93,11 @@ public class SetupService
         return getProgress(KafkaSetupBean.class);
     }
 
+    /**
+     * Interface to get the kafka setup progress
+     *
+     * @return Haoop setup progress in format {progress: int}  (percentage) or error code and message
+     */
     @GET
     @Path("/hadoopSetupProgress")
     public Response hadoopStatus()
@@ -76,6 +105,12 @@ public class SetupService
         return getProgress(HadoopSetupBean.class);
     }
 
+    /**
+     * Interface to validate Kafka at a given location
+     *
+     * @param params json request with key path, where to validate kafka at
+     * @return {present: boolean} or error code and message
+     */
     @POST
     @Path("/validateKafkaAtLocation")
     public Response validateKafkaAtLocation(String params)
@@ -90,10 +125,9 @@ public class SetupService
                         present = KafkaSetupBean.getInstance()
                                 .validateFolder(restRequestManager.getString("path"));
                     }
-                    catch (IOException e)
+                    catch (LoggedClientCompatibleException e)
                     {
-                        restRequestManager.setCustomError(HTTPStatusCodes.SERVER_ISSUES.INTERNAL_SERVER_ERROR,
-                                                          e.getLocalizedMessage());
+                        restRequestManager.setCustomError(e);
                         return;
                     }
 
@@ -104,6 +138,12 @@ public class SetupService
                 .generateResponse();
     }
 
+    /**
+     * Interface to validate hadoop at a given location
+     *
+     * @param params json request with key path, where to validate kafka at
+     * @return {present: boolean} or error code and message
+     */
     @POST
     @Path("/validateHadoopAtLocation")
     public Response validateHadoopAtLocation(String params)
@@ -118,10 +158,9 @@ public class SetupService
                         present = HadoopSetupBean.getInstance()
                                 .validateFolder(restRequestManager.getString("path"));
                     }
-                    catch (IOException e)
+                    catch (LoggedClientCompatibleException e)
                     {
-                        restRequestManager.setCustomError(HTTPStatusCodes.SERVER_ISSUES.INTERNAL_SERVER_ERROR,
-                                                          e.getLocalizedMessage());
+                        restRequestManager.setCustomError(new LoggedClientCompatibleException(e, LOGGER));
                         return;
                     }
 
@@ -132,6 +171,14 @@ public class SetupService
                 .generateResponse();
     }
 
+    /**
+     * Interface to set the Kafka and Zookeeper properties for this application, the old file is renamed and the
+     * previous configuration logged
+     *
+     * @param params properties in json format containing {property.name = property-value} for kafka and
+     *         zookeeper
+     * @return success code and empty message body or error code and error message
+     */
     @POST
     @Path("/setKafkaProperties")
     public Response setKafkaProperties(String params)
@@ -142,33 +189,48 @@ public class SetupService
                     .concat("/config/server.properties");
             String pathToZookeeperConfigFile = SettingsManager.getInstance().getSetting("pathToKafka")
                     .concat("/config/zookeeper.properties");
-            return setProperties(params, new String[]{pathToKafkaConfigFile, pathToZookeeperConfigFile},
-                                 KafkaSetupBean.class);
+            return setKafkaProperties(params, new String[]{pathToKafkaConfigFile, pathToZookeeperConfigFile});
         }
         else
         {
             return new RestRequestManager()
-                    .setCustomError(HTTPStatusCodes.CLIENT_ISSUES.FORBIDDEN,
-                                    "Pfad zu Kafka wurde noch nicht gesetzt")
+                    .setCustomError(new LoggedClientCompatibleException(
+                            new IllegalStateException(
+                                    "A Client requested to set Kafkas properties, but the path to Kafka is not set yet"),
+                            "Der Pfad zu Kafka wurde noch nicht gesetzt",
+                            HTTPStatusCodes.CLIENT_ISSUES.FORBIDDEN, LOGGER, Level.FINE))
                     .generateResponse();
         }
     }
 
+    /**
+     * Interface to finish the setup and persisting the configuration
+     *
+     * @return 200 and an empty response body or an error code and message
+     */
     @POST
     @Path("/finish")
     public Response finish()
     {
         if (!SettingsManager.getInstance().hasSetting("pathToKafka"))
         {
-            return new RestRequestManager().setCustomError(HTTPStatusCodes.CLIENT_ISSUES.METHOD_NOT_ALLOWED,
-                                                           "Pfad zu Kafka wurde noch nicht gesetzt")
+            return new RestRequestManager()
+                    .setCustomError(new LoggedClientCompatibleException(
+                            new IllegalStateException(
+                                    "A Client requested to finish the setup, but the path to Kafka is not set yet"),
+                            "Der Pfad zu Kafka wurde noch nicht gesetzt",
+                            HTTPStatusCodes.CLIENT_ISSUES.FORBIDDEN, LOGGER, Level.FINE))
                     .generateResponse();
         }
 
         if (!SettingsManager.getInstance().hasSetting("pathToHadoop"))
         {
-            return new RestRequestManager().setCustomError(HTTPStatusCodes.CLIENT_ISSUES.METHOD_NOT_ALLOWED,
-                                                           "Pfad zu Kafka wurde noch nicht gesetzt")
+            return new RestRequestManager()
+                    .setCustomError(new LoggedClientCompatibleException(
+                            new IllegalStateException(
+                                    "A Client requested to finish the setup, but the path to Hadoop is not set yet"),
+                            "Der Pfad zu Hadoop wurde noch nicht gesetzt",
+                            HTTPStatusCodes.CLIENT_ISSUES.FORBIDDEN, LOGGER, Level.FINE))
                     .generateResponse();
         }
 
@@ -181,15 +243,20 @@ public class SetupService
                              }
                              catch (IOException exception)
                              {
-                                 LOGGER.severe(
-                                         "Could not persist settings: \n".concat(exception.getLocalizedMessage()));
-                                 restRequestManager.setCustomError(HTTPStatusCodes.SERVER_ISSUES.INTERNAL_SERVER_ERROR,
-                                                                   "Ein serverseitiger Fehler ist aufgetreten");
+                                 restRequestManager
+                                         .setCustomError(new LoggedClientCompatibleException(exception, LOGGER));
                              }
 
                          }).generateResponse();
     }
 
+    /**
+     * helper method to install components based on their beans
+     *
+     * @param component, bean which is capable of installing the component
+     * @param parameters parameters containing the path where to install the component to as json
+     * @return code 200 and empty message body or error code and message
+     */
     private Response installComponent(Class<?> component, String parameters)
     {
         return new RestRequestManager()
@@ -202,16 +269,31 @@ public class SetupService
                     {
                         if (!dir.isDirectory())
                         {
-                            restRequestManager.setCustomError(HTTPStatusCodes.CLIENT_ISSUES.BAD_REQUEST,
-                                                              "Der angegebene Pfad ist kein Verzeichnis");
+                            restRequestManager.setCustomError(new LoggedClientCompatibleException(
+                                    new IllegalStateException(
+                                            String.format(
+                                                    "A client requested an installation with %s. But %s is not a valid directory",
+                                                    component.getSimpleName(), dir.getAbsolutePath())),
+                                    "Der angegebene Pfad ist kein Verzeichnis",
+                                    HTTPStatusCodes.CLIENT_ISSUES.BAD_REQUEST, LOGGER, Level.FINE));
                             return;
                         }
 
-                        if (Objects.requireNonNull(dir.list()).length > 0)
+                        String[] folderList = dir.list();
+
+                        if (folderList != null)
                         {
-                            restRequestManager.setCustomError(HTTPStatusCodes.CLIENT_ISSUES.CONFLICT,
-                                                              "Das angegebene Verzeichnis ist nicht leer");
-                            return;
+                            if (folderList.length > 0)
+                            {
+                                restRequestManager.setCustomError(new LoggedClientCompatibleException(
+                                        new IllegalStateException(
+                                                String.format(
+                                                        "A client requested an installation with %s. But %s is not empty",
+                                                        component.getSimpleName(), dir.getAbsolutePath())),
+                                        "Das angegebene Verzeichnis ist nicht leer\"",
+                                        HTTPStatusCodes.CLIENT_ISSUES.CONFLICT, LOGGER, Level.FINE));
+                                return;
+                            }
                         }
                     }
 
@@ -219,30 +301,50 @@ public class SetupService
                     {
                         getBeanFromName(component).install(restRequestManager.getString("path"));
                     }
-                    catch (IOException e)
+                    catch (IOException | LoggedClientCompatibleException e)
                     {
-                        restRequestManager.setCustomError(HTTPStatusCodes.SERVER_ISSUES.INTERNAL_SERVER_ERROR,
-                                                          e.getLocalizedMessage());
+                        if (e instanceof LoggedClientCompatibleException)
+                        {
+                            restRequestManager.setCustomError((LoggedClientCompatibleException) e);
+                            return;
+                        }
 
-                        StringWriter sw = new StringWriter();
-                        e.printStackTrace(new PrintWriter(sw));
-                        LOGGER.severe(sw.toString());
+                        restRequestManager.setCustomError(new LoggedClientCompatibleException(e, LOGGER));
                     }
                 })
                 .generateResponse();
     }
 
+    /**
+     * Helper method to get progress of a component installation by its bean class
+     *
+     * @param component bean to get the progress for
+     * @return code 200 and {progress: int} (percentage) or error code and error message
+     */
     private Response getProgress(Class<?> component)
     {
         return new RestRequestManager()
                 .execute(restRequestManager -> {
-                    int progress = getBeanFromName(component).getProgress();
+                    int progress = 0;
+                    try
+                    {
+                        progress = getBeanFromName(component).getProgress();
+                    }
+                    catch (LoggedClientCompatibleException e)
+                    {
+                        restRequestManager.setCustomError(e);
+                        return;
+                    }
 
                     if (progress == -1)
                     {
-                        restRequestManager
-                                .setCustomError(HTTPStatusCodes.CLIENT_ISSUES.FORBIDDEN,
-                                                "Das Kafka Setup wurde noch nicht gestartet");
+                        restRequestManager.setCustomError(new LoggedClientCompatibleException(
+                                new IllegalStateException(
+                                        String.format(
+                                                "A client requested to get the progress of %s, however, the installation was not started yet",
+                                                component.getSimpleName())),
+                                "Das Setup wurde noch nicht gestartet. Es kann kein Fortschritt angezeigt werden.\"",
+                                HTTPStatusCodes.CLIENT_ISSUES.FORBIDDEN, LOGGER, Level.FINE));
                     }
                     else
                     {
@@ -252,9 +354,16 @@ public class SetupService
                 .generateResponse();
     }
 
-    private SetupBean<?> getBeanFromName(Class<?> component)
+    /**
+     * Translates a class name to a bean instance
+     *
+     * @param component bean name to get the instance for
+     * @return bean instance
+     * @throws LoggedClientCompatibleException if bean is not implemented or no installation bean
+     */
+    private SetupBean getBeanFromName(Class<?> component) throws LoggedClientCompatibleException
     {
-        SetupBean<?> bean;
+        SetupBean bean;
 
         switch (component.getSimpleName())
         {
@@ -265,14 +374,25 @@ public class SetupService
                 bean = HadoopSetupBean.getInstance();
                 break;
             default:
-                throw new UnsupportedOperationException(
-                        "There is no installer bean for this component: " + component.getSimpleName());
+                throw new LoggedClientCompatibleException(
+                        new UnsupportedOperationException(
+                                String.format("There is no installer bean for this component: %s",
+                                              component.getSimpleName())),
+                        "Eine Implementierung auf serverseite fehlt noch.",
+                        HTTPStatusCodes.SERVER_ISSUES.NOT_IMPLEMENTED, LOGGER);
         }
 
         return bean;
     }
 
-    private Response setProperties(String params, String[] pathsToConfigFiles, Class<?> setupBean)
+    /**
+     * Helper method for setting the Kafka properties to the given files
+     *
+     * @param params settings to set for the file, if it contains the setting
+     * @param pathsToConfigFiles files to try to overwrite the settings in
+     * @return code 200 and empty response body or error code and message
+     */
+    private Response setKafkaProperties(String params, String[] pathsToConfigFiles)
     {
         RestRequestManager manager = new RestRequestManager()
                 .setParameters(params)
@@ -288,21 +408,26 @@ public class SetupService
                 {
                     try
                     {
-                        getBeanFromName(setupBean)
+                        KafkaSetupBean.getInstance()
                                 .setProperties(new JSONObject(params).getJSONObject("config"), configFile);
                     }
                     catch (IOException e)
                     {
-                        restRequestManager.setCustomError(HTTPStatusCodes.SERVER_ISSUES.INTERNAL_SERVER_ERROR,
-                                                          "Konnte nicht auf die Datei zugreifen");
-                        LOGGER.severe(e.getLocalizedMessage());
+
+                        restRequestManager.setCustomError(new LoggedClientCompatibleException(e,
+                                                                                              "Konnte nicht auf die Konfigurationsdatei zugreifen",
+                                                                                              HTTPStatusCodes.SERVER_ISSUES.INTERNAL_SERVER_ERROR,
+                                                                                              LOGGER));
                     }
                 }
                 else
                 {
-                    restRequestManager.setCustomError(HTTPStatusCodes.SERVER_ISSUES.INTERNAL_SERVER_ERROR,
-                                                      "Konfigurationsdatei existiert nicht im konfigurierten Pfad"
-                                                              .concat(pathToConfigFile));
+                    restRequestManager.setCustomError(new LoggedClientCompatibleException(
+                            new IllegalStateException("Could not access the config file. It does not exist at path"
+                                                              .concat(pathToConfigFile)),
+                            "Konnte nicht auf die Konfigurationsdatei zugreifen. Sie schein nicht zu existieren.",
+                            HTTPStatusCodes.SERVER_ISSUES.INTERNAL_SERVER_ERROR,
+                            LOGGER));
                 }
             });
         }

@@ -10,6 +10,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.logging.Logger;
 
+/**
+ * Class to manage the settings for this application
+ */
 public class SettingsManager
 {
     private static final Logger LOGGER = Logger.getLogger(SettingsManager.class.getName());
@@ -17,10 +20,16 @@ public class SettingsManager
     private HashMap<String, String> settings = new HashMap<>();
     private List<String> persistables = new ArrayList<>();
 
+    /**
+     * Private constructor for singleton pattern
+     */
     private SettingsManager()
     {
     }
 
+    /**
+     * @return SettingsManager instance for singleton pattern
+     */
     public static SettingsManager getInstance()
     {
         if (instance == null)
@@ -31,6 +40,14 @@ public class SettingsManager
         return instance;
     }
 
+    /**
+     * set a setting by key
+     *
+     * @param key name of the setting
+     * @param value value of the setting
+     * @param persistable if the setting is persisted to greenlake-properties.json
+     * @return this object to allow builder pattern where possible
+     */
     public SettingsManager setSetting(String key, String value, boolean persistable)
     {
         settings.put(key, value);
@@ -43,11 +60,23 @@ public class SettingsManager
         return this;
     }
 
+    /**
+     * returns a setting as string
+     *
+     * @param key name of the setting
+     * @return value of the setting
+     */
     public String getSetting(String key)
     {
         return settings.get(key);
     }
 
+    /**
+     * removes a setting from the settings
+     *
+     * @param key name of the setting
+     * @return this object to allow builder pattern where possible
+     */
     public SettingsManager removeSetting(String key)
     {
         persistables.remove(key);
@@ -55,11 +84,20 @@ public class SettingsManager
         return this;
     }
 
+    /**
+     * @return whether a setting is present
+     */
     public boolean hasSetting(String key)
     {
         return settings.containsKey(key);
     }
 
+    /**
+     * method to persist the settings to greenlake-properties.json, marks the end of the builder pattern and therefore
+     * returns void
+     *
+     * @throws IOException when greenlake-properties.json can't be accessed
+     */
     public void persistSettings() throws IOException
     {
         File configFile = new File(System.getProperty("jboss.server.config.dir")

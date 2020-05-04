@@ -12,6 +12,9 @@ import java.io.File;
 import java.io.IOException;
 import java.util.logging.Logger;
 
+/**
+ * Bean that manages the lifecycle with deployment of this application
+ */
 @Singleton
 @Startup
 @SuppressWarnings("unused")
@@ -19,6 +22,9 @@ public class LifeCycleBean
 {
     private static final Logger LOGGER = Logger.getLogger(LifeCycleBean.class.getName());
 
+    /**
+     * Code executed after deployment
+     */
     @PostConstruct
     @SuppressWarnings("unused")
     public void postConstruct()
@@ -65,6 +71,14 @@ public class LifeCycleBean
         SettingsManager.getInstance().setSetting("hadoopDownload", resourceDownloads.getString("hadoop"), false);
     }
 
+    /**
+     * helper method that tries to load a value from a file and sets a default if not successful
+     *
+     * @param setting name of the setting to load
+     * @param file file to load the setting from
+     * @param defaultValue default value to set when file is not loaded
+     * @param persistable whether the setting can be written to greenlake-properties.json
+     */
     private void fileOrDefault(String setting, File file, String defaultValue, boolean persistable)
     {
         if (file.exists())

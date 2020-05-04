@@ -1,22 +1,27 @@
 package setup;
 
 import settings.SettingsManager;
+import util.LoggedClientCompatibleException;
 
-import javax.ejb.Stateless;
 import java.io.IOException;
-import java.util.HashMap;
 
-@Stateless
-public class KafkaSetupBean extends SetupBean<KafkaSetupBean>
+/**
+ * Subclass of SetupBean that handles the Kafka installation
+ */
+public class KafkaSetupBean extends SetupBean
 {
     private static KafkaSetupBean instance;
 
-    private static HashMap<String, Class<?>> requiredProperties = new HashMap<>();
-
+    /**
+     * Private constructor for singleton pattern
+     */
     private KafkaSetupBean()
     {
     }
 
+    /**
+     * @return KafkaSetupBean instance for singleton pattern
+     */
     public static KafkaSetupBean getInstance()
     {
         if (instance == null)
@@ -27,21 +32,39 @@ public class KafkaSetupBean extends SetupBean<KafkaSetupBean>
         return instance;
     }
 
+    /**
+     * Installs Kafka and sets the path in the settings
+     *
+     * @param path, path to install Kafka to
+     * @throws IOException inherited from super install
+     * @throws LoggedClientCompatibleException inherited from super methods
+     */
     @Override
-    public void install(String path) throws IOException
+    public void install(String path) throws IOException, LoggedClientCompatibleException
     {
         super.install(path, SettingsManager.getInstance().getSetting("kafkaDownload"));
-        path = path.replace("\\", "/");
-        SettingsManager.getInstance().setSetting("pathToKafka", path, true);
+        SettingsManager.getInstance().setSetting("pathToKafka", super.toAbsolutePath(path), true);
     }
 
+    /**
+     * Method needed in super class to get the name of the installation goal for logs and stuff
+     *
+     * @return Name of the installation goal as String
+     */
     @Override
     protected String getNameOfInstallationGoal()
     {
         return "Kafka";
     }
 
-    public boolean validateFolder(String folder) throws IOException
+    /**
+     * Validates the installation of Kafka in a given folder
+     *
+     * @param folder folder to validate Kafka in
+     * @return if Kafka is present in that folder
+     * @throws LoggedClientCompatibleException inherited from super method
+     */
+    public boolean validateFolder(String folder) throws LoggedClientCompatibleException
     {
         return super.validateFolder(folder, "kafkaHash");
     }
