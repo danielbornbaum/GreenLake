@@ -2,12 +2,16 @@ package GreenhouseDataModels;
 
 import javafx.util.Pair;
 
+import java.time.LocalTime;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
 public interface IGreenhouseData {
 
     int getId();
+
+    Calendar getTime();
 
     int getMoistureSensValue1();
 
@@ -23,6 +27,8 @@ public interface IGreenhouseData {
 
     void setId(int id);
 
+    void setTime(Calendar time);
+
     void setMoistureSensValue1(int moistureSensValue1);
 
     void setTempSensValue1(float tempSensValue1);
@@ -35,5 +41,5 @@ public interface IGreenhouseData {
 
     void setBrightnessSensValue(float brightnessSensValue);
 
-    Pair<List<IGreenhouseData>, Integer> generateNewDay(int secondInterval, int monthRainDays, GeneratorMonth month, Date date, float lastTemperatureIn, float lastTemperatureOut, float lastHumidityIn, float lastHumidityOut);
+    Pair<List<IGreenhouseData>, Integer> generateNewDay(int secondInterval, int monthRainDays, GeneratorMonth month, Calendar calendar, float lastTemperatureIn, float lastTemperatureOut, float lastHumidityIn, float lastHumidityOut);
 }

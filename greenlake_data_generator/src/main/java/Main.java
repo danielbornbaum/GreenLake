@@ -1,8 +1,13 @@
+import io.netty.util.internal.logging.Slf4JLoggerFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 
 public class Main {
+    static final Logger logger = LoggerFactory.getLogger(Main.class);
 
     public static void main(String[] args) {
         System.out.println("Willkommen beim Smart Greenhouse Daten Generator.\n" +
@@ -41,6 +46,7 @@ public class Main {
         System.out.println("Beginne mit der Generierung von Daten für das Greenhouse mit der Id " + id);
         GeneratorThread thread = new GeneratorThread(id, alternative);
         thread.run();
+        logger.info("Generator thread started");
         System.out.println("Drücke eine beliebige Taste, um die Anwendung zu schließen.");
         readConsole();
         thread.stopExecution();
