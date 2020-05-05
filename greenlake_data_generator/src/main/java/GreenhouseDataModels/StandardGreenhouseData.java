@@ -349,6 +349,17 @@ public class StandardGreenhouseData implements IGreenhouseData {
                     }
                 }
             }
+            else if (month.season == Season.SPRING && brightness == 0) {
+                if (humidityOutside > 90) {
+                    humidityOutside = 89 + (float) Math.random();
+                }
+                else if (humidityOutside < 80) {
+                    humidityOutside = humidityOutside + (float) Math.random() * 5;
+                }
+                else {
+                    humidityOutside = humidityOutside - 2 + (float) Math.random() * 4;
+                }
+            }
             else if (month.season == Season.SUMMER && noon < entry && entry < afternoon) {
                 if (humidityOutside > 55) {
                     humidityOutside = humidityOutside - (float) Math.random() * 5;
@@ -385,10 +396,10 @@ public class StandardGreenhouseData implements IGreenhouseData {
             data.setHumiditySensValue1(humidityOutside);
 
             //Inside DONE
-            if (humidityInside > 82) {
+            if (humidityInside > 82 || (tempInside > 28 && tempDifference < 0) ) {
                 ventilate = true;
             }
-            else if (humidityInside < 56 && ventilate) {
+            else if (((humidityInside < 56 && tempInside < 26) || (humidityInside < 56 && tempDifference > 0) || (tempInside > 28 && tempDifference > 0)) && ventilate) {
                 ventilate = false;
             }
 
