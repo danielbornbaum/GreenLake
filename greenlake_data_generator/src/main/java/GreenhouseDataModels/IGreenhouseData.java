@@ -41,5 +41,5 @@ public interface IGreenhouseData {
 
     void setBrightnessSensValue(float brightnessSensValue);
 
-    Pair<List<IGreenhouseData>, Integer> generateNewDay(int secondInterval, int monthRainDays, GeneratorMonth month, Calendar calendar, float lastTemperatureIn, float lastTemperatureOut, float lastHumidityIn, float lastHumidityOut);
+    Pair<List<IGreenhouseData>, Integer> generateNewDay(int secondInterval, int monthRainDays, GeneratorMonth month, Calendar calendar, IGreenhouseData lastEntry);
 }

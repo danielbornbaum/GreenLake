@@ -51,23 +51,20 @@ public class GeneratorThread extends Thread {
     public void run() {
         System.out.println("Generator-Thread started with Greenhouse-ID " + greenhouseId + " and Type " + greenhouseType);
         IGreenhouseData greenhouseData = null;
+        IGreenhouseData lastEntry = null;
         int secondInterval = 300;
         switch (greenhouseType) {
             case 1:
                 greenhouseData = new StandardGreenhouseData(greenhouseId);
+                lastEntry = new StandardGreenhouseData(greenhouseType);
                 break;
             case 2:
                 greenhouseData = new AlternativeOneGreenhouseData(greenhouseId);
+                lastEntry = new AlternativeOneGreenhouseData(greenhouseType);
                 break;
         }
 
         Calendar calendar = Calendar.getInstance();
-        calendar.clear();
-
-        float lastTemperatureIn = 20;
-        float lastTemperatureOut = 5;
-        float lastHumidityIn = 50;
-        float lastHumidityOut = 80;
 
         try {
             Properties props = new Properties();
@@ -100,22 +97,69 @@ public class GeneratorThread extends Thread {
             });
 
             JSONObject jsonRecord = (JSONObject) JSONObject.stringToValue(latestRecord.get().value());
-            lastTemperatureOut = jsonRecord.getFloat("temperatureOutside");
-            lastTemperatureIn = jsonRecord.getFloat("temperatureInside");
-            lastHumidityOut = jsonRecord.getFloat("humidityOutside");
-            lastHumidityIn = jsonRecord.getFloat("humidityInside");
+            //TODO parse string to calendar error
             calendar = (Calendar) jsonRecord.get("timestamp");
             calendar.add(Calendar.SECOND, secondInterval);
             logger.info("Latest entry received from Kafka");
+
+            switch(greenhouseType){
+                case 1:
+                    lastEntry.setTime(calendar);
+                    lastEntry.setTempSensValue1(jsonRecord.getFloat("temperatureOutside"));
+                    lastEntry.setTempSensValue2(jsonRecord.getFloat("temperatureInside"));
+                    lastEntry.setHumiditySensValue1(jsonRecord.getFloat("humidityOutside"));
+                    lastEntry.setHumiditySensValue2(jsonRecord.getFloat("humidityInside"));
+                    lastEntry.setBrightnessSensValue(jsonRecord.getFloat("brightness"));
+                    lastEntry.setMoistureSensValue1(jsonRecord.getInt("moisturePlant1"));
+                    ((StandardGreenhouseData) lastEntry).setMoistureSensValue2(jsonRecord.getInt("moisturePlant2"));
+                    ((StandardGreenhouseData) lastEntry).setMoistureSensValue3(jsonRecord.getInt("moisturePlant3"));
+                    ((StandardGreenhouseData) lastEntry).setMoistureSensValue4(jsonRecord.getInt("moisturePlant4"));
+                    break;
+                case 2:
+                    lastEntry.setTime(calendar);
+                    lastEntry.setTempSensValue1(jsonRecord.getFloat("temperatureOutside"));
+                    lastEntry.setTempSensValue2(jsonRecord.getFloat("temperatureInside"));
+                    lastEntry.setHumiditySensValue1(jsonRecord.getFloat("humidityOutside"));
+                    lastEntry.setHumiditySensValue2(jsonRecord.getFloat("humidityInside"));
+                    lastEntry.setBrightnessSensValue(jsonRecord.getFloat("brightness"));
+                    lastEntry.setMoistureSensValue1(jsonRecord.getInt("moisturePlant1"));
+                    ((AlternativeOneGreenhouseData) lastEntry).setMoistureSensValue2(jsonRecord.getInt("moisturePlant2"));
+                    break;
+            }
         }
         catch (Exception e) {
             logger.error("Couldn't receive data from Kafka, proceeding with standard values.\n" +
                     "Error: " + e.getMessage());
-            lastTemperatureIn = 20;
-            lastTemperatureOut = 5;
-            lastHumidityIn = 50;
-            lastHumidityOut = 80;
-            calendar.setTime(new Date());
+            calendar.set(Calendar.AM_PM, 0);
+            calendar.set(Calendar.HOUR, 0);
+            calendar.set(Calendar.HOUR_OF_DAY, 0);
+            calendar.set(Calendar.MINUTE, 0);
+            calendar.set(Calendar.SECOND, 0);
+            calendar.set(Calendar.MILLISECOND, 0);
+            switch(greenhouseType) {
+                case 1:
+                    lastEntry.setTime(calendar);
+                    lastEntry.setTempSensValue1(8);
+                    lastEntry.setTempSensValue2(18);
+                    lastEntry.setHumiditySensValue1(52);
+                    lastEntry.setHumiditySensValue2(78);
+                    lastEntry.setBrightnessSensValue(0);
+                    lastEntry.setMoistureSensValue1(70);
+                    ((StandardGreenhouseData) lastEntry).setMoistureSensValue2(70);
+                    ((StandardGreenhouseData) lastEntry).setMoistureSensValue3(70);
+                    ((StandardGreenhouseData) lastEntry).setMoistureSensValue4(70);
+                    break;
+                case 2:
+                    lastEntry.setTime(calendar);
+                    lastEntry.setTempSensValue1(8);
+                    lastEntry.setTempSensValue2(18);
+                    lastEntry.setHumiditySensValue1(52);
+                    lastEntry.setHumiditySensValue2(78);
+                    lastEntry.setBrightnessSensValue(0);
+                    lastEntry.setMoistureSensValue1(70);
+                    ((AlternativeOneGreenhouseData) lastEntry).setMoistureSensValue2(70);
+                    break;
+            }
         }
 
         int currentMonthNumber;
@@ -123,19 +167,22 @@ public class GeneratorThread extends Thread {
         int monthRainDays = 0;
         GeneratorMonth currentMonth = january;
         List<IGreenhouseData> list = null;
-        IGreenhouseData lastEntry = null;
         Pair<List<IGreenhouseData>, Integer> result = null;
         while (runThread) {
             if (result != null) {
                 list = result.getKey();
                 lastEntry = list.get(list.size() - 1);
                 calendar = lastEntry.getTime();
-                lastTemperatureOut = lastEntry.getTempSensValue1();
-                lastTemperatureIn = lastEntry.getTempSensValue2();
-                lastHumidityOut = lastEntry.getHumiditySensValue1();
-                lastHumidityIn = lastEntry.getHumiditySensValue2();
+                calendar.set(Calendar.AM_PM, 0);
+                calendar.set(Calendar.HOUR, 0);
+                calendar.set(Calendar.HOUR_OF_DAY, 0);
+                calendar.set(Calendar.MINUTE, 0);
+                calendar.set(Calendar.SECOND, 0);
+                calendar.set(Calendar.MILLISECOND, 0);
+                calendar.add(Calendar.DAY_OF_WEEK, 1);
+                lastEntry.setTime(calendar);
             }
-            currentMonthNumber = calendar.get(Calendar.MONTH);
+            currentMonthNumber = lastEntry.getTime().get(Calendar.MONTH);
             if (oldMonthNumber != currentMonthNumber) {
                 switch (currentMonthNumber) {
                     case 1:
@@ -178,7 +225,7 @@ public class GeneratorThread extends Thread {
                 oldMonthNumber = currentMonthNumber;
                 monthRainDays = 0;
             }
-            result = greenhouseData.generateNewDay(secondInterval, monthRainDays, currentMonth, calendar, lastTemperatureIn, lastTemperatureOut, lastHumidityIn, lastHumidityOut);
+            result = greenhouseData.generateNewDay(secondInterval, monthRainDays, currentMonth, calendar, lastEntry);
             monthRainDays = result.getValue();
 
             List<IGreenhouseData> entries = result.getKey();
@@ -221,8 +268,6 @@ public class GeneratorThread extends Thread {
                 producer.send(new ProducerRecord<>("generator-test", key, jsonString));
                 logger.info("New entry send to Kafka: " + jsonString);
             }
-
-            calendar.add(Calendar.DAY_OF_WEEK, 1);
         }
 
         producer.close();

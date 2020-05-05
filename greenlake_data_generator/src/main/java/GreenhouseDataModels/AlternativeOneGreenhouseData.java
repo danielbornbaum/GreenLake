@@ -15,8 +15,6 @@ public class AlternativeOneGreenhouseData implements IGreenhouseData {
     private Calendar time;
     private int moistureSensValue1;
     private int moistureSensValue2;
-    private int moistureSensValue3;
-    private int moistureSensValue4;
     private float tempSensValue1;
     private float tempSensValue2;
     private float humiditySensValue1;
@@ -38,14 +36,6 @@ public class AlternativeOneGreenhouseData implements IGreenhouseData {
 
     public int getMoistureSensValue2() {
         return moistureSensValue2;
-    }
-
-    public int getMoistureSensValue3() {
-        return moistureSensValue3;
-    }
-
-    public int getMoistureSensValue4() {
-        return moistureSensValue4;
     }
 
     public float getTempSensValue1() {
@@ -80,14 +70,6 @@ public class AlternativeOneGreenhouseData implements IGreenhouseData {
         this.moistureSensValue2 = moistureSensValue2;
     }
 
-    public void setMoistureSensValue3(int moistureSensValue3) {
-        this.moistureSensValue3 = moistureSensValue3;
-    }
-
-    public void setMoistureSensValue4(int moistureSensValue4) {
-        this.moistureSensValue4 = moistureSensValue4;
-    }
-
     public void setTempSensValue1(float tempSensValue1) { this.tempSensValue1 = tempSensValue1; }
 
     public void setTempSensValue2(float tempSensValue2) {
@@ -103,13 +85,18 @@ public class AlternativeOneGreenhouseData implements IGreenhouseData {
     public void setBrightnessSensValue(float brightnessSensValue) { this.brightnessSensValue = brightnessSensValue; }
     //endregion
 
-    public Pair<List<IGreenhouseData>, Integer> generateNewDay(int secondInterval, int monthRainDays, GeneratorMonth month, Calendar calendar, float lastTemperatureIn, float lastTemperatureOut, float lastHumidityIn, float lastHumidityOut) {
-        logger.info(String.format("Started generating data for Greenhouse %i at %i.%{i.%i", calendar.get(Calendar.DAY_OF_MONTH), calendar.get(Calendar.MONTH), calendar.get(Calendar.YEAR)));
+    public Pair<List<IGreenhouseData>, Integer> generateNewDay(int secondInterval, int monthRainDays, GeneratorMonth month, Calendar calendar, IGreenhouseData lastData) {
+        logger.info(String.format("Started generating data for Greenhouse %d at %d.%d.%d",
+                this.getId(),
+                calendar.get(Calendar.DAY_OF_MONTH),
+                calendar.get(Calendar.MONTH),
+                calendar.get(Calendar.YEAR)));
         Random random = new Random();
         List<IGreenhouseData> day = new ArrayList<>();
+        AlternativeOneGreenhouseData lastEntry = (AlternativeOneGreenhouseData) lastData;
         int startId = 1;
         int monthDays = YearMonth.of(calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH)).lengthOfMonth();
-        int entryCount = (24 * 3600) / secondInterval;
+        int entryCount = (24 * 3600) / secondInterval - 1;
         int noon = (12 * 3600) / secondInterval;
         int afternoon = (16 * 3600) / secondInterval;
         int rainStartEntry = 0;
@@ -159,16 +146,14 @@ public class AlternativeOneGreenhouseData implements IGreenhouseData {
 
         //Generate first constant entry
         AlternativeOneGreenhouseData data = new AlternativeOneGreenhouseData(startId);
-        data.setTempSensValue1(lastTemperatureOut);
-        data.setTempSensValue2(lastTemperatureIn);
-        data.setHumiditySensValue1(lastHumidityOut);
-        data.setHumiditySensValue2(lastHumidityIn);
+        data.setTempSensValue1(lastEntry.getTempSensValue1());
+        data.setTempSensValue2(lastEntry.getTempSensValue2());
+        data.setHumiditySensValue1(lastEntry.getHumiditySensValue1());
+        data.setHumiditySensValue2(lastEntry.getHumiditySensValue2());
         data.setTime(calendar);
-        data.setBrightnessSensValue(0);
-        data.setMoistureSensValue1(70);
-        data.setMoistureSensValue2(70);
-        data.setMoistureSensValue3(70);
-        data.setMoistureSensValue4(70);
+        data.setBrightnessSensValue(lastEntry.getBrightnessSensValue());
+        data.setMoistureSensValue1(lastEntry.getMoistureSensValue1());
+        data.setMoistureSensValue2(lastEntry.getMoistureSensValue2());
 
         day.add(data);
         AlternativeOneGreenhouseData lastInstance = data;
@@ -177,6 +162,7 @@ public class AlternativeOneGreenhouseData implements IGreenhouseData {
         //Loop generating all other entries
         for (int entry = 1; entry < entryCount; entry++) {
             data = new AlternativeOneGreenhouseData(startId);
+            data.setTime((Calendar) lastInstance.getTime().clone());
             brightness = lastInstance.getBrightnessSensValue();
             tempOutside = lastInstance.getTempSensValue1();
             tempInside = lastInstance.getTempSensValue2();
@@ -204,14 +190,12 @@ public class AlternativeOneGreenhouseData implements IGreenhouseData {
 
             //Set Time DONE
             calendar = data.getTime();
-            calendar.add(Calendar.SECOND, secondInterval);
+            calendar.setTimeInMillis(calendar.getTimeInMillis() + secondInterval * 1000);
             data.setTime(calendar);
 
             //Set Moisture DONE
             data.setMoistureSensValue1(generateMoisture(lastInstance.getMoistureSensValue1()));
             data.setMoistureSensValue2(generateMoisture(lastInstance.getMoistureSensValue2()));
-            data.setMoistureSensValue3(generateMoisture(lastInstance.getMoistureSensValue3()));
-            data.setMoistureSensValue4(generateMoisture(lastInstance.getMoistureSensValue4()));
 
             //Set Temperature DONE
             //Outside DONE

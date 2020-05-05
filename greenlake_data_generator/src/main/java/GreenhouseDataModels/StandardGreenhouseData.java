@@ -103,7 +103,7 @@ public class StandardGreenhouseData implements IGreenhouseData {
     public void setBrightnessSensValue(float brightnessSensValue) { this.brightnessSensValue = brightnessSensValue; }
     //endregion
 
-    public Pair<List<IGreenhouseData>, Integer> generateNewDay(int secondInterval, int monthRainDays, GeneratorMonth month, Calendar calendar, float lastTemperatureIn, float lastTemperatureOut, float lastHumidityIn, float lastHumidityOut) {
+    public Pair<List<IGreenhouseData>, Integer> generateNewDay(int secondInterval, int monthRainDays, GeneratorMonth month, Calendar calendar, IGreenhouseData lastData) {
         logger.info(String.format("Started generating data for Greenhouse %d at %d.%d.%d",
                 this.getId(),
                 calendar.get(Calendar.DAY_OF_MONTH),
@@ -113,7 +113,7 @@ public class StandardGreenhouseData implements IGreenhouseData {
         List<IGreenhouseData> day = new ArrayList<>();
         int startId = 1;
         int monthDays = YearMonth.of(calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH)).lengthOfMonth();
-        int entryCount = (24 * 3600) / secondInterval - 1;
+        int entryCount = (24 * 3600) / secondInterval;
         int noon = (12 * 3600) / secondInterval;
         int afternoon = (16 * 3600) / secondInterval;
         int rainStartEntry = 0;
@@ -161,25 +161,11 @@ public class StandardGreenhouseData implements IGreenhouseData {
             fogEndEntry = (int) Math.round((month.sunrise.getMinute() * 60 + month.sunrise.getHour() * 3600 + 3600 * Math.random() * 0.25) / secondInterval);
         }
 
-        //Generate first constant entry
-        StandardGreenhouseData data = new StandardGreenhouseData(startId);
-        data.setTempSensValue1(lastTemperatureOut);
-        data.setTempSensValue2(lastTemperatureIn);
-        data.setHumiditySensValue1(lastHumidityOut);
-        data.setHumiditySensValue2(lastHumidityIn);
-        data.setTime(calendar);
-        data.setBrightnessSensValue(0);
-        data.setMoistureSensValue1(70);
-        data.setMoistureSensValue2(70);
-        data.setMoistureSensValue3(70);
-        data.setMoistureSensValue4(70);
-
-        day.add(data);
-        StandardGreenhouseData lastInstance = data;
-        startId++;
+        StandardGreenhouseData lastInstance = (StandardGreenhouseData) lastData;
+        StandardGreenhouseData data = null;
 
         //Loop generating all other entries
-        for (int entry = 1; entry < entryCount; entry++) {
+        for (int entry = 1; entry <= entryCount; entry++) {
             data = new StandardGreenhouseData(startId);
             data.setTime((Calendar) lastInstance.getTime().clone());
             brightness = lastInstance.getBrightnessSensValue();
@@ -208,10 +194,11 @@ public class StandardGreenhouseData implements IGreenhouseData {
             }
 
             //Set Time DONE
-            //TODO Fix time
-            calendar = data.getTime();
-            calendar.add(Calendar.SECOND, secondInterval);
-            data.setTime(calendar);
+            if (entry > 1) {
+                calendar = data.getTime();
+                calendar.setTimeInMillis(calendar.getTimeInMillis() + secondInterval * 1000);
+                data.setTime(calendar);
+            }
 
             //Set Moisture DONE
             data.setMoistureSensValue1(generateMoisture(lastInstance.getMoistureSensValue1()));
@@ -222,7 +209,7 @@ public class StandardGreenhouseData implements IGreenhouseData {
             //Set Temperature DONE
             //Outside DONE
             calendar = data.getTime();
-            LocalTime currentTime = LocalTime.of(calendar.get(Calendar.HOUR), calendar.get(Calendar.MINUTE), calendar.get(Calendar.SECOND));
+            LocalTime currentTime = LocalTime.of(calendar.get(Calendar.HOUR_OF_DAY), calendar.get(Calendar.MINUTE), calendar.get(Calendar.SECOND));
             if (currentTime.isBefore(month.sunrise)) {
                 tempOutside = tempOutside - (float) 0.1 + (float) Math.random() / 5;
             }
