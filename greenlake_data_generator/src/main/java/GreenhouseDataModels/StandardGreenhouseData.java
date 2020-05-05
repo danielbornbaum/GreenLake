@@ -107,12 +107,12 @@ public class StandardGreenhouseData implements IGreenhouseData {
         logger.info(String.format("Started generating data for Greenhouse %d at %d.%d.%d",
                 this.getId(),
                 calendar.get(Calendar.DAY_OF_MONTH),
-                calendar.get(Calendar.MONTH),
+                (calendar.get(Calendar.MONTH) + 1),
                 calendar.get(Calendar.YEAR)));
         Random random = new Random();
         List<IGreenhouseData> day = new ArrayList<>();
         int startId = 1;
-        int monthDays = YearMonth.of(calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH)).lengthOfMonth();
+        int monthDays = YearMonth.of(calendar.get(Calendar.YEAR), (calendar.get(Calendar.MONTH) + 1)).lengthOfMonth();
         int entryCount = (24 * 3600) / secondInterval;
         int noon = (12 * 3600) / secondInterval;
         int afternoon = (16 * 3600) / secondInterval;

@@ -27,6 +27,7 @@ public class GeneratorThread extends Thread {
     private boolean runThread;
 
     private Producer<String, String> producer;
+    private CalendarConverter converter;
 
     private GeneratorMonth january;
     private GeneratorMonth february;
@@ -89,16 +90,15 @@ public class GeneratorThread extends Thread {
                 // poll to get the last record in each partition
                 consumer.poll(Duration.ofSeconds(10)).forEach(record -> {
                     // the latest record in the 'topic' is the one with the highest timestamp
-                    if (record.timestamp() > maxTimestamp.get()) {
+                    if (record.timestamp() > maxTimestamp.get() && record.value().contains("\"greenhouseID\":" + greenhouseId)) {
                         maxTimestamp.set(record.timestamp());
                         latestRecord.set(record);
                     }
                 });
             });
 
-            JSONObject jsonRecord = (JSONObject) JSONObject.stringToValue(latestRecord.get().value());
-            //TODO parse string to calendar error
-            calendar = (Calendar) jsonRecord.get("timestamp");
+            JSONObject jsonRecord = new JSONObject(latestRecord.get().value());
+            calendar = converter.ConvertToCalendar(jsonRecord.getJSONObject("timestamp"));
             calendar.add(Calendar.SECOND, secondInterval);
             logger.info("Latest entry received from Kafka");
 
@@ -165,7 +165,7 @@ public class GeneratorThread extends Thread {
         int currentMonthNumber;
         int oldMonthNumber = 0;
         int monthRainDays = 0;
-        GeneratorMonth currentMonth = january;
+        GeneratorMonth currentMonth = null;
         List<IGreenhouseData> list = null;
         Pair<List<IGreenhouseData>, Integer> result = null;
         while (runThread) {
@@ -185,40 +185,40 @@ public class GeneratorThread extends Thread {
             currentMonthNumber = lastEntry.getTime().get(Calendar.MONTH);
             if (oldMonthNumber != currentMonthNumber) {
                 switch (currentMonthNumber) {
-                    case 1:
+                    case 0:
                         currentMonth = january;
                         break;
-                    case 2:
+                    case 1:
                         currentMonth = february;
                         break;
-                    case 3:
+                    case 2:
                         currentMonth = march;
                         break;
-                    case 4:
+                    case 3:
                         currentMonth = april;
                         break;
-                    case 5:
+                    case 4:
                         currentMonth = may;
                         break;
-                    case 6:
+                    case 5:
                         currentMonth = june;
                         break;
-                    case 7:
+                    case 6:
                         currentMonth = july;
                         break;
-                    case 8:
+                    case 7:
                         currentMonth = august;
                         break;
-                    case 9:
+                    case 8:
                         currentMonth = september;
                         break;
-                    case 10:
+                    case 9:
                         currentMonth = october;
                         break;
-                    case 11:
+                    case 10:
                         currentMonth = november;
                         break;
-                    case 12:
+                    case 11:
                         currentMonth = december;
                         break;
                 }
@@ -237,7 +237,7 @@ public class GeneratorThread extends Thread {
                         StandardGreenhouseData standardEntry = (StandardGreenhouseData) entry;
                         jsonString = new JSONObject()
                                 .put("greenhouseID", 1)
-                                .put("timestamp", standardEntry.getTime())
+                                .put("timestamp", converter.ConvertToJson(standardEntry.getTime()))
                                 .put("temperatureOutside", standardEntry.getTempSensValue1())
                                 .put("temperatureInside", standardEntry.getTempSensValue2())
                                 .put("humidityOutside", standardEntry.getHumiditySensValue1())
@@ -303,5 +303,6 @@ public class GeneratorThread extends Thread {
         props.put(VALUE_SERIALIZER_CLASS_CONFIG, "org.apache.kafka.common.serialization.StringSerializer");
 
         producer = new KafkaProducer<>(props);
+        converter = new CalendarConverter();
     }
 }
