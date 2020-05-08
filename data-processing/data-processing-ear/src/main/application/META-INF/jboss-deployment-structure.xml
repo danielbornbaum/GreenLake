@@ -1,0 +1,6 @@
+<jboss-deployment-structure>
+    <ear-subdeployments-isolated>true</ear-subdeployments-isolated>
+
+    <sub-deployment name="data-processing-react-war.war"/>
+    <sub-deployment name="data-processing-server-war.war"/>
+</jboss-deployment-structure>

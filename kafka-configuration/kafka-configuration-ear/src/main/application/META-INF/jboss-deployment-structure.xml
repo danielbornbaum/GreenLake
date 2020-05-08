@@ -1,0 +1,6 @@
+<jboss-deployment-structure>
+    <ear-subdeployments-isolated>true</ear-subdeployments-isolated>
+
+    <sub-deployment name="kafka-configuration-react-war.war"/>
+    <sub-deployment name="kafka-configuration-server-war.war"/>
+</jboss-deployment-structure>
