@@ -1,6 +1,7 @@
 package GreenhouseDataModels;
 
 import javafx.util.Pair;
+import org.apache.kafka.common.protocol.types.Field;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -45,6 +46,7 @@ public class StandardGreenhouseData extends GreenhouseData {
         int startId = 1;
         int monthDays = YearMonth.of(calendar.get(Calendar.YEAR), (calendar.get(Calendar.MONTH) + 1)).lengthOfMonth();
         int entryCount = (24 * 3600) / secondInterval;
+        int morning = (10 * 3600) / secondInterval;
         int noon = (12 * 3600) / secondInterval;
         int afternoon = (16 * 3600) / secondInterval;
         int rainStartEntry = 0;
@@ -63,6 +65,10 @@ public class StandardGreenhouseData extends GreenhouseData {
         float humidityOutside = 0;
         float brightness = 0;
         float tempDifference = 0;
+        boolean water1 = false;
+        boolean water2 = false;
+        boolean water3 = false;
+        boolean water4 = false;
 
         //Generate special conditions (rain / fog)
         if(generateWeightedDecision(0.4) || monthDays - calendar.get(Calendar.DAY_OF_MONTH) == month.rainDays) {
@@ -137,19 +143,27 @@ public class StandardGreenhouseData extends GreenhouseData {
 
 
             //Set Moisture
-            data.setMoistureSensValue1(generateMoisture(lastInstance.getMoistureSensValue1()));
-            data.setMoistureSensValue2(generateMoisture(lastInstance.getMoistureSensValue2()));
-            data.setMoistureSensValue3(generateMoisture(lastInstance.getMoistureSensValue3()));
-            data.setMoistureSensValue4(generateMoisture(lastInstance.getMoistureSensValue4()));
+            Pair tempPair = generateMoisture(lastInstance.getMoistureSensValue1(), water1);
+            data.setMoistureSensValue1((int) tempPair.getKey());
+            water1 = (boolean) tempPair.getValue();
+            tempPair = generateMoisture(lastInstance.getMoistureSensValue2(), water2);
+            data.setMoistureSensValue2((int) tempPair.getKey());
+            water2 = (boolean) tempPair.getValue();
+            tempPair = generateMoisture(lastInstance.getMoistureSensValue3(), water3);
+            data.setMoistureSensValue3((int) tempPair.getKey());
+            water3 = (boolean) tempPair.getValue();
+            tempPair = generateMoisture(lastInstance.getMoistureSensValue4(), water4);
+            data.setMoistureSensValue4((int) tempPair.getKey());
+            water4 = (boolean) tempPair.getValue();
 
             //Set Brightness
-            Pair tempPair = generateBrightness(brightness, currentTime, month, entry, noon, rain, fog, leftNormalEntries, brightEntries);
+            tempPair = generateBrightness(brightness, currentTime, month, entry, noon, rain, fog, leftNormalEntries, brightEntries);
             brightness = (float) tempPair.getKey();
             brightEntries = (int) tempPair.getValue();
             data.setBrightnessSensValue(brightness);
 
             //Set Humidity
-            humidityOutside = generateHumidityOutside(fog, rain, humidBeforeRain, entry, humidEntryBeforeRain, noon, afternoon, humidityOutside, month, brightness);
+            humidityOutside = generateHumidityOutside(fog, rain, humidBeforeRain, entry, humidEntryBeforeRain, morning, noon, afternoon, humidityOutside, month, brightness);
             data.setHumiditySensValue1(humidityOutside);
 
             tempPair = generateHumidityInside(humidityInside, ventilate, rain);
@@ -186,19 +200,26 @@ public class StandardGreenhouseData extends GreenhouseData {
         }
     }
 
-    private int generateMoisture(int lastMoisture){
+    private Pair<Integer, Boolean> generateMoisture(int lastMoisture, boolean water){
         if(lastMoisture < 70) {
-            return 82;
+            water = true;
+        }
+        else if(lastMoisture > 82 && water) {
+            water = false;
+        }
+        if(water) {
+            lastMoisture = lastMoisture + 4;
         }
         else if(generateWeightedDecision(0.5)){
-            return lastMoisture - 2;
+            lastMoisture = lastMoisture - 2;
         }
         else {
-            return lastMoisture - 1;
+            lastMoisture = lastMoisture - 1;
         }
+        return new Pair<>(lastMoisture, water);
     }
 
-    private float generateHumidityOutside(boolean fog, boolean rain, boolean humidBeforeRain, int entry, int humidEntryBeforeRain, int noon, int afternoon, float humidityOutside, GeneratorMonth month, float brightness) {
+    private float generateHumidityOutside(boolean fog, boolean rain, boolean humidBeforeRain, int entry, int humidEntryBeforeRain, int morning, int noon, int afternoon, float humidityOutside, GeneratorMonth month, float brightness) {
         if (fog) {
             humidityOutside = 95 + (float) Math.random() * 5;
         }
@@ -225,9 +246,9 @@ public class StandardGreenhouseData extends GreenhouseData {
                 humidityOutside = humidityOutside - 2 + (float) Math.random() * 4;
             }
         }
-        else if (month.season == Season.WINTER && brightness > 70) {
+        else if ((month.season == Season.SPRING && entry < morning) || (month.season == Season.WINTER && brightness > 70)) {
             if (humidityOutside > 85) {
-                humidityOutside = 84 + + (float) Math.random();
+                humidityOutside = 84 + (float) Math.random();
             }
             else if (humidityOutside < 70) {
                 humidityOutside = humidityOutside + (float) Math.random() * 5;
