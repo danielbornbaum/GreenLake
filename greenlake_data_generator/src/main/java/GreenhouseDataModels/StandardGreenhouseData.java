@@ -166,7 +166,7 @@ public class StandardGreenhouseData extends GreenhouseData {
             humidityOutside = generateHumidityOutside(fog, rain, humidBeforeRain, entry, humidEntryBeforeRain, morning, noon, afternoon, humidityOutside, month, brightness);
             data.setHumiditySensValue1(humidityOutside);
 
-            tempPair = generateHumidityInside(humidityInside, ventilate, rain);
+            tempPair = generateHumidityInside(humidityInside, ventilate, rain, tempInside);
             ventilate = (boolean) tempPair.getKey();
             humidityInside = (float) tempPair.getValue();
             data.setHumiditySensValue2(humidityInside);
