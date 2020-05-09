@@ -66,6 +66,7 @@ public class GeneratorThread extends Thread {
         }
 
         Calendar calendar = Calendar.getInstance();
+        System.out.println("Rufe letzten Eintrag für gegebene ID ab falls vorhanden");
 
         try {
             Properties props = new Properties();
@@ -167,6 +168,7 @@ public class GeneratorThread extends Thread {
         GeneratorMonth currentMonth = null;
         List<GreenhouseData> list = null;
         Pair<List<GreenhouseData>, Integer> result = null;
+
         while (runThread) {
             if (result != null) {
                 list = result.getKey();
@@ -264,8 +266,18 @@ public class GeneratorThread extends Thread {
                         break;
                 }
 
-                producer.send(new ProducerRecord<>("generator-test", key, jsonString));
-                logger.info("New entry send to Kafka: " + jsonString);
+                try {
+                    if (!runThread && entries.indexOf(entry) == entries.size()-1) {
+                        System.out.println("Warte auf Abschluss der Übertragung");
+                        producer.send(new ProducerRecord<>("generator-test", key, jsonString)).get();
+                    } else {
+                        producer.send(new ProducerRecord<>("generator-test", key, jsonString));
+                    }
+                    logger.info("New entry send to Kafka: " + jsonString);
+                }
+                catch (Exception e) {
+                    logger.error("Sending entry via Kafka failed: Entry: " + jsonString + " | error: " + e.getMessage());
+                }
             }
         }
 

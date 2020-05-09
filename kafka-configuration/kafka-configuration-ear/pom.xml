@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <parent>
+        <artifactId>kafka-configuration</artifactId>
+        <groupId>de.dhbw</groupId>
+        <version>1.0-SNAPSHOT</version>
+    </parent>
+    <modelVersion>4.0.0</modelVersion>
+    <packaging>ear</packaging>
+    <version>1.0-SNAPSHOT</version>
+    <name>kafka-configuration-ear</name>
+
+    <artifactId>kafka-configuration-ear</artifactId>
+    <build>
+        <finalName>kafka-configuration</finalName>
+        <plugins>
+            <plugin>
+                <artifactId>maven-ear-plugin</artifactId>
+                <version>${maven-ear-plugin.version}</version>
+                <configuration>
+                    <modules>
+                        <webModule archiveName="kafka-configuration-server-war">
+                            <groupId>de.dhbw</groupId>
+                            <artifactId>kafka-configuration-server-war</artifactId>
+                            <uri>kafka-configuration-server-war.war</uri>
+                        </webModule>
+                        <webModule archiveName="kafka-configuration-react-war">
+                            <groupId>de.dhbw</groupId>
+                            <artifactId>kafka-configuration-react-war</artifactId>
+                            <uri>kafka-configuration-react-war.war</uri>
+                        </webModule>
+                    </modules>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+
+    <dependencies>
+        <dependency>
+            <groupId>de.dhbw</groupId>
+            <artifactId>kafka-configuration-server-war</artifactId>
+            <version>${project.version}</version>
+            <type>war</type>
+        </dependency>
+        <dependency>
+            <groupId>de.dhbw</groupId>
+            <artifactId>kafka-configuration-react-war</artifactId>
+            <version>${project.version}</version>
+            <type>war</type>
+        </dependency>
+    </dependencies>
+
+</project>
