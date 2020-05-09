@@ -246,7 +246,7 @@ public class StandardGreenhouseData extends GreenhouseData {
                 humidityOutside = humidityOutside - 2 + (float) Math.random() * 4;
             }
         }
-        else if ((month.season == Season.SPRING && entry < morning) || (month.season == Season.WINTER && brightness > 70)) {
+        else if (((month.season == Season.SPRING || month.season == Season.FALL) && entry < morning) || (month.season == Season.WINTER && brightness > 70)) {
             if (humidityOutside > 85) {
                 humidityOutside = 84 + (float) Math.random();
             }
@@ -271,7 +271,7 @@ public class StandardGreenhouseData extends GreenhouseData {
         return  humidityOutside;
     }
 
-    private Pair<Boolean, Float> generateHumidityInside(float humidityInside, boolean ventilate, boolean rain) {
+    private Pair<Boolean, Float> generateHumidityInside(float humidityInside, boolean ventilate, boolean rain, float tempInside) {
         if (humidityInside > 82) {
             ventilate = true;
         }
@@ -288,7 +288,12 @@ public class StandardGreenhouseData extends GreenhouseData {
             }
         }
         else {
-            humidityInside = humidityInside + (float) Math.random();
+            if(tempInside > 23) {
+                humidityInside = humidityInside + (float) Math.random() * 2;
+            }
+            else {
+                humidityInside = humidityInside + (float) Math.random();
+            }
         }
         return new Pair<>(ventilate,humidityInside);
     }
