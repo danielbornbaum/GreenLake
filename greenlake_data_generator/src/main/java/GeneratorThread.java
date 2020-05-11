@@ -50,9 +50,9 @@ public class GeneratorThread extends Thread {
     }
 
     public void run() {
-        System.out.println("Generator-Thread gestartet mit Greenhouse-ID " + greenhouseId);
-        IGreenhouseData greenhouseData = null;
-        IGreenhouseData lastEntry = null;
+        System.out.println("Generator-Thread started with Greenhouse-ID " + greenhouseId + " and Type " + greenhouseType);
+        GreenhouseData greenhouseData = null;
+        GreenhouseData lastEntry = null;
         int secondInterval = 300;
         switch (greenhouseType) {
             case 1:
@@ -100,7 +100,6 @@ public class GeneratorThread extends Thread {
 
             JSONObject jsonRecord = new JSONObject(latestRecord.get().value());
             calendar = converter.ConvertToCalendar(jsonRecord.getJSONObject("timestamp"));
-            calendar.add(Calendar.SECOND, secondInterval);
             logger.info("Latest entry received from Kafka");
 
             switch(greenhouseType){
@@ -167,21 +166,21 @@ public class GeneratorThread extends Thread {
         int oldMonthNumber = 0;
         int monthRainDays = 0;
         GeneratorMonth currentMonth = null;
-        List<IGreenhouseData> list = null;
-        Pair<List<IGreenhouseData>, Integer> result = null;
-        System.out.println("Starte tatsaechliche Generierung der Daten");
+        List<GreenhouseData> list = null;
+        Pair<List<GreenhouseData>, Integer> result = null;
+
         while (runThread) {
             if (result != null) {
                 list = result.getKey();
                 lastEntry = list.get(list.size() - 1);
                 calendar = lastEntry.getTime();
+                calendar.add(Calendar.DAY_OF_WEEK, 1);
                 calendar.set(Calendar.AM_PM, 0);
                 calendar.set(Calendar.HOUR, 0);
                 calendar.set(Calendar.HOUR_OF_DAY, 0);
                 calendar.set(Calendar.MINUTE, 0);
                 calendar.set(Calendar.SECOND, 0);
                 calendar.set(Calendar.MILLISECOND, 0);
-                calendar.add(Calendar.DAY_OF_WEEK, 1);
                 lastEntry.setTime(calendar);
             }
             currentMonthNumber = lastEntry.getTime().get(Calendar.MONTH);
@@ -227,11 +226,11 @@ public class GeneratorThread extends Thread {
                 oldMonthNumber = currentMonthNumber;
                 monthRainDays = 0;
             }
-            result = greenhouseData.generateNewDay(secondInterval, monthRainDays, currentMonth, calendar, lastEntry);
+            result = greenhouseData.generateNewDay(secondInterval, monthRainDays, currentMonth, lastEntry);
             monthRainDays = result.getValue();
 
-            List<IGreenhouseData> entries = result.getKey();
-            for (IGreenhouseData entry : entries) {
+            List<GreenhouseData> entries = result.getKey();
+            for (GreenhouseData entry : entries) {
                 String key = String.valueOf(greenhouseId);
                 String jsonString = "";
                 switch (greenhouseType) {
