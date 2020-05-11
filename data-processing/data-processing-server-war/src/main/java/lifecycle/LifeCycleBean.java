@@ -36,7 +36,7 @@ public class LifeCycleBean
     private static final String appId = "data-processing"; // id inside the platform to deploy the app
     private static final int orderNumber = 4; // position of the app inside the menu
     private static final String name = "Datenverarbeitung"; // display name of the app
-    private static final String iconPath = "data-processing/images/icon/app-icon.jpg"; // path to the apps icon
+    private static final String iconPath = "data-processing/images/icons/app-icon.jpg"; // path to the apps icon
     private static final String url = "/data-processing"; // path to the app
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
