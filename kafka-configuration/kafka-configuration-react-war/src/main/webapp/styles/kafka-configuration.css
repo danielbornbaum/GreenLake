@@ -1,0 +1,147 @@
+body{
+  margin: 0;
+}
+
+html{
+  margin: 0;
+}
+
+.kafka-titlebar{
+  display: flex;
+  justify-content: left;
+  padding: 2px;
+  position: fixed;
+  height: 35px;
+  width: 100%;
+  background-color: #b8fcbe;
+}
+
+.kafka-titlebar *{
+  margin: auto 3px auto 3px;
+  padding: 5px;
+}
+
+.kafka-titlebar p{
+  font-size: 14pt;
+  margin: auto 3px auto 3px;
+}
+
+.topics{
+  position: absolute;
+  top: 50px;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 5px;
+}
+
+.topic-add-button{
+    position: absolute;
+    width: 60px;
+    height: 60px;
+    right: 10px;
+    bottom: 10px;
+    border-radius: 50%;
+    border: 0;
+    background-color: #32a63b;
+    cursor: pointer;
+    z-index: 100;
+    font-size: 18pt;
+}
+
+.topic-add-button:hover{
+    background-color: #3bc446;
+}
+
+.topic-add-button:disabled{
+  cursor: default;
+  background-color: #c2ffc7;
+}
+
+.topics h1{
+  margin: 0 0 0 5px;
+  text-decoration: underline;
+  font-weight: normal;
+}
+
+.topics-header{
+  display: flex;
+  justify-content: space-between;
+}
+
+.topics-content-div{
+  display: flex;
+  justify-content: left;
+  font-size: 14pt;
+  height: 100%;
+  overflow-y: auto;
+}
+
+.topics-content-div div{
+  width: 33%;
+  position: relative;
+}
+
+.topics-content-div div:nth-child(3){
+  width: calc(33% - 30px);
+}
+
+.topics-content-div div:nth-child(4){
+  max-width: 30px;
+}
+
+.topics-content-div button{
+  width: 28px;
+  color: #F00;
+  border: none;
+  height: 30px;
+  border-radius: 2px;
+  margin: 2px;
+  cursor: pointer;
+  background-color: #FFF;
+  padding-bottom: 3px;
+  padding-right: 21px;
+}
+
+.topics-content-div button:active{
+  color: #FFF;
+  background-color: #ff5500;
+}
+
+.topics-content-div ul{
+  list-style-type: none;
+  max-height: 100%;
+  margin-top: 44px;
+  margin-left: 0px;
+  padding: 0px;
+  margin-bottom: 30px;
+}
+
+.title-element{
+  position: fixed;
+  width: calc(33% - 7px);
+  background-color: #FFF;
+  margin: 0;
+  padding: 10px 0 10px 10;
+  font-weight: bold;
+  text-decoration: underline;
+  border-width: 0 0 1px 0;
+  border-style: solid;
+  border-color: #000;
+}
+
+.topics-content-div li{
+  padding: 5px 5px 5px 10px;
+  border-width: 0 1px 0 0;
+  border-color: #000;
+  border-style: solid;
+}
+
+.topics-content-div li:nth-child(even){
+  background-color: #e3ffe5;
+}
+
+.activeSwitch{
+    border-radius: 5px;
+    transition: 2s;
+}

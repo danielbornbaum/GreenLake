@@ -1,6 +1,6 @@
 import React from "react"
 import Draggable from "react-draggable"
-import "../../styles/uicomponents/window.css"
+import "../../styles/components/window.css"
 
 export class Window extends React.Component{
 
