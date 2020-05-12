@@ -10,7 +10,6 @@ public abstract class GreenhouseData {
     private int id;
     private Calendar time;
     private int moistureSensValue1;
-    private int moistureSensValue2;
     private float tempSensValue1;
     private float tempSensValue2;
     private float humiditySensValue1;
@@ -24,10 +23,6 @@ public abstract class GreenhouseData {
 
     public int getMoistureSensValue1() {
         return moistureSensValue1;
-    }
-
-    public int getMoistureSensValue2() {
-        return moistureSensValue2;
     }
 
     public float getTempSensValue1() {
@@ -58,10 +53,6 @@ public abstract class GreenhouseData {
 
     public void setMoistureSensValue1(int moistureSensValue1) { this.moistureSensValue1 = moistureSensValue1; }
 
-    public void setMoistureSensValue2(int moistureSensValue2) {
-        this.moistureSensValue2 = moistureSensValue2;
-    }
-
     public void setTempSensValue1(float tempSensValue1) { this.tempSensValue1 = tempSensValue1; }
 
     public void setTempSensValue2(float tempSensValue2) {
@@ -78,4 +69,14 @@ public abstract class GreenhouseData {
     //endregion
 
     public abstract Pair<List<GreenhouseData>, Integer> generateNewDay(int secondInterval, int monthRainDays, GeneratorMonth month, GreenhouseData lastEntry);
+
+    protected boolean generateWeightedDecision(double occurenceProbability) {
+        double random = Math.random();
+        if (random > occurenceProbability) {
+            return false;
+        }
+        else {
+            return true;
+        }
+    }
 }

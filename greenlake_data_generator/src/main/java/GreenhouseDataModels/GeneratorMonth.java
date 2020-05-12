@@ -11,10 +11,10 @@ public class GeneratorMonth {
     public LocalTime sunrise;
     public LocalTime sunset;
     public float intenseSunHours;
-    public float rainDays;
+    public int rainDays;
     public float avgHumidity;
 
-    public GeneratorMonth (Season season, float avgMinTemp, float absoluteMinTemp, float avgMaxTemp, float absoluteMaxTemp, LocalTime sunrise, LocalTime sunset, float intenseSunHours, float rainDays, float avgHumidity) {
+    public GeneratorMonth (Season season, float avgMinTemp, float absoluteMinTemp, float avgMaxTemp, float absoluteMaxTemp, LocalTime sunrise, LocalTime sunset, float intenseSunHours, int rainDays, float avgHumidity) {
         this.season = season;
         this.avgMinTemp = avgMinTemp;
         this.absoluteMinTemp = absoluteMinTemp;

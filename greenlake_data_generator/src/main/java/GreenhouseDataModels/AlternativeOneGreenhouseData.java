@@ -11,7 +11,16 @@ import java.util.*;
 public class AlternativeOneGreenhouseData extends GreenhouseData {
     final Logger logger = LoggerFactory.getLogger(AlternativeOneGreenhouseData.class);
 
+    private int moistureSensValue2;
     private Random random;
+
+    public int getMoistureSensValue2() {
+        return moistureSensValue2;
+    }
+
+    public void setMoistureSensValue2(int moistureSensValue2) {
+        this.moistureSensValue2 = moistureSensValue2;
+    }
 
     public AlternativeOneGreenhouseData(int id) { setId(id); }
 
@@ -156,16 +165,6 @@ public class AlternativeOneGreenhouseData extends GreenhouseData {
 
         logger.info("Generating day finished - returning result");
         return new Pair<>(day, monthRainDays);
-    }
-
-    private boolean generateWeightedDecision(double occurenceProbability) {
-        double random = Math.random();
-        if (random > occurenceProbability) {
-            return false;
-        }
-        else {
-            return true;
-        }
     }
 
     private int generateMoisture(int lastMoisture){
