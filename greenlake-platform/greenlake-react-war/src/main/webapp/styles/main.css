@@ -54,7 +54,7 @@ body{
     background: #9eeb34;
     max-width: 200px;
     width: 200px;
-    z-index: 1000;
+    z-index: -100;
     overflow-y: auto;
     overflow-x: hidden;
 
@@ -87,6 +87,12 @@ body{
     transition: opacity 0.5ss ease-in;
 }
 
+input{
+  padding: 3px;
+  border-radius: 2px;
+  border-width: 1px;
+}
+
 button{
     cursor: pointer;
     padding: 5px;
@@ -96,17 +102,12 @@ button{
 }
 
 button::disabled{
-    background-color: #b9dbbc;
-    color: #fff;
     cursor: default;
+    background-color: #c2ffc7;
 }
 
 button:hover{
     background-color: #3bc446;
-}
-
-button:disabled:hover{
-    background-color: #b9dbbc;
 }
 
 .home-background{

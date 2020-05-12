@@ -255,8 +255,11 @@ public abstract class SetupBean
 
         for (File dir : dirs)
         {
-            hashBuilder.append(hashFoldersRecursively(path.concat(dir.getName()).concat("/")));
-            hashBuilder.append(dir.getName().hashCode());
+            if (!"logs".equals(dir.getName()))
+            {
+                hashBuilder.append(hashFoldersRecursively(path.concat(dir.getName()).concat("/")));
+                hashBuilder.append(dir.getName().hashCode());
+            }
         }
 
         for (File file : files)

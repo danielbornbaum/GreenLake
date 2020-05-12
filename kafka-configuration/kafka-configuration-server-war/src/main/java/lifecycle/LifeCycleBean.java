@@ -31,12 +31,15 @@ public class LifeCycleBean
 
     // Change these Settings to your liking ////////////////////////////////////////////////////////////////////////////
     private static final String appId = "kafka-configuration"; // id inside the platform to deploy the app
-    private static final int orderNumber = Integer.MAX_VALUE; // position of the app inside the menu
+    private static final int orderNumber = 3; // position of the app inside the menu
     private static final String name = "Kafka Konfiguration"; // display name of the app
     private static final String iconPath = "/kafka-configuration/images/icons/app-icon.png"; // path to the apps icon
     private static final String url = "/kafka-configuration"; // path to the app
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+    /**
+     * Constructor sets parameters for registration
+     */
     public LifeCycleBean()
     {
         try
@@ -58,7 +61,7 @@ public class LifeCycleBean
         }
         catch (Exception e)
         {
-            //failDeployment(e);
+            failDeployment(e);
         }
     }
 
@@ -114,6 +117,10 @@ public class LifeCycleBean
         }
     }
 
+    /**
+     * fails the deployment because of a given error
+     * @param e, exception that was thrown
+     */
     private void failDeployment(Exception e)
     {
         StringWriter sw = new StringWriter();
@@ -124,7 +131,9 @@ public class LifeCycleBean
         throw new RuntimeException("Could not deploy");
     }
 
-
+    /**
+     * Unregisters the app before undeployment
+     */
     @PreDestroy
     public void preDestroy()
     {

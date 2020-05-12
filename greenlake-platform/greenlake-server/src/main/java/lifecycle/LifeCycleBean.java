@@ -30,11 +30,11 @@ public class LifeCycleBean
     public void postConstruct()
     {
         File kafkaHashFile = new File(
-                System.getProperty("jboss.server.config.dir").concat("\\greenlake\\validation\\kafka.hash"));
+                System.getProperty("jboss.server.config.dir").concat("/greenlake/validation/kafka.hash"));
         File hadoopHashFile = new File(
-                System.getProperty("jboss.server.config.dir").concat("\\greenlake\\validation\\hadoop.hash"));
+                System.getProperty("jboss.server.config.dir").concat("/greenlake/validation/hadoop.hash"));
         File resourceDownloadFile = new File(
-                System.getProperty("jboss.server.config.dir").concat("\\greenlake\\resource-downloads.json"));
+                System.getProperty("jboss.server.config.dir").concat("/greenlake/resource-downloads.json"));
 
         JSONObject resourceDownloads = new JSONObject()
                 .put("kafka", "http://mirror.23media.de/apache/kafka/2.4.1/kafka_2.11-2.4.1.tgz")
