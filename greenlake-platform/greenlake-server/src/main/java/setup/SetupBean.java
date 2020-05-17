@@ -247,24 +247,17 @@ public abstract class SetupBean
             return "";
         }
 
-        //alphabetically sorted files and folders
+        //alphabetically sorted folders
         List<File> dirs = Arrays.asList(Objects.requireNonNull(new File(path).listFiles(File::isDirectory)));
         dirs.sort(Comparator.comparing(File::getName));
-        List<File> files = Arrays.asList(Objects.requireNonNull(new File(path).listFiles(File::isFile)));
-        files.sort(Comparator.comparing(File::getName));
 
         for (File dir : dirs)
         {
-            if (!"logs".equals(dir.getName()))
+            if (!("logs".equals(dir.getName()) && "data".equals(dir.getName())))
             {
                 hashBuilder.append(hashFoldersRecursively(path.concat(dir.getName()).concat("/")));
                 hashBuilder.append(dir.getName().hashCode());
             }
-        }
-
-        for (File file : files)
-        {
-            hashBuilder.append(file.getName().hashCode());
         }
 
         return hashBuilder.toString();
