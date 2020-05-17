@@ -1,15 +1,13 @@
 package lifecycle;
 
 import org.json.JSONObject;
+import processing.ProcessorPool;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import javax.ejb.Singleton;
 import javax.ejb.Startup;
 import javax.management.ObjectName;
-import javax.ws.rs.client.*;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
@@ -135,6 +133,8 @@ public class LifeCycleBean
 
         try
         {
+            ProcessorPool.getInstance().unregisterAll();
+
             URL url = new URL(String.format("%s:%d/greenlake-platform/apps/unregister", address, port));
 
             conn = (HttpURLConnection) url.openConnection();

@@ -1,1 +1,8 @@
 lifecycle\LifeCycleBean.class
+processing\ProcessorPool.class
+processing\DataProcessor.class
+processing\DataProcessor$SourceDestination.class
+rest\DataProcessing.class
+processing\DataProcessor$LogHandler.class
+rest\services\JobService.class
+processing\Process.class

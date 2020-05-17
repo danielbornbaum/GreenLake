@@ -32,6 +32,7 @@
     "css-loader": "^3.4.2",
     "file-loader": "^6.0.0",
     "react": "^16.13.0",
+    "react-ace": "^8.1.0",
     "react-dom": "^16.13.0",
     "react-draggable": "^4.2.0",
     "style-loader": "^1.1.3",
