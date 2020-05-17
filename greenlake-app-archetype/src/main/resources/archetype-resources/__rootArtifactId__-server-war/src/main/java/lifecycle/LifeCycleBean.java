@@ -33,11 +33,11 @@ public class LifeCycleBean
     private int port;
 
     // Change these Settings to your liking ////////////////////////////////////////////////////////////////////////////
-    private static final String appId = "kafka-configuration"; // id inside the platform to deploy the app
+    private static final String appId = "${rootArtifactId}"; // id inside the platform to deploy the app
     private static final int orderNumber = Integer.MAX_VALUE; // position of the app inside the menu
-    private static final String name = "kafka-configuration"; // display name of the app
-    private static final String iconPath = "kafka-configuration/images/icon/app-icon.jpg"; // path to the apps icon
-    private static final String url = "/kafka-configuration"; // path to the app
+    private static final String name = "${rootArtifactId}"; // display name of the app
+    private static final String iconPath = "${rootArtifactId}/images/icons/app-icon.jpg"; // path to the apps icon
+    private static final String url = "/${rootArtifactId}"; // path to the app
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     public LifeCycleBean()
@@ -102,7 +102,7 @@ public class LifeCycleBean
                         conn.getResponseCode(), new String(conn.getInputStream().readAllBytes()))));
             }
 
-            LOGGER.info("\n\n\nRegistered app Kafka Configuration");
+            LOGGER.info("\n\n\nRegistered app ${rootArtifactId}");
         }
         catch (IOException e)
         {
