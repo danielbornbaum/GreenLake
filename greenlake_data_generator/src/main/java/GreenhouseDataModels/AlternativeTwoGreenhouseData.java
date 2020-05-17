@@ -1,23 +1,32 @@
 package GreenhouseDataModels;
 
 import javafx.util.Pair;
-import org.apache.kafka.common.protocol.types.Field;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.time.LocalTime;
 import java.time.YearMonth;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.List;
+import java.util.Random;
 
-public class StandardGreenhouseData extends GreenhouseData {
-    final Logger logger = LoggerFactory.getLogger(StandardGreenhouseData.class);
+public class AlternativeTwoGreenhouseData extends GreenhouseData {
+    final Logger logger = LoggerFactory.getLogger(AlternativeTwoGreenhouseData.class);
 
     private int moistureSensValue2;
     private int moistureSensValue3;
     private int moistureSensValue4;
+    private int moistureSensValue5;
+    private int moistureSensValue6;
+    private int moistureSensValue7;
+    private int moistureSensValue8;
+    private int moistureSensValue9;
+    private int moistureSensValue10;
+
     private Random random;
 
-    public StandardGreenhouseData(int id) { setId(id); }
+    public AlternativeTwoGreenhouseData(int id) { setId(id); }
 
     public int getMoistureSensValue2() {
         return moistureSensValue2;
@@ -31,6 +40,30 @@ public class StandardGreenhouseData extends GreenhouseData {
         return moistureSensValue4;
     }
 
+    public int getMoistureSensValue5() {
+        return moistureSensValue5;
+    }
+
+    public int getMoistureSensValue6() {
+        return moistureSensValue6;
+    }
+
+    public int getMoistureSensValue7() {
+        return moistureSensValue7;
+    }
+
+    public int getMoistureSensValue8() {
+        return moistureSensValue8;
+    }
+
+    public int getMoistureSensValue9() {
+        return moistureSensValue9;
+    }
+
+    public int getMoistureSensValue10() {
+        return moistureSensValue10;
+    }
+
     public void setMoistureSensValue2(int moistureSensValue2) {
         this.moistureSensValue2 = moistureSensValue2;
     }
@@ -41,6 +74,30 @@ public class StandardGreenhouseData extends GreenhouseData {
 
     public void setMoistureSensValue4(int moistureSensValue4) {
         this.moistureSensValue4 = moistureSensValue4;
+    }
+
+    public void setMoistureSensValue5(int moistureSensValue5) {
+        this.moistureSensValue5 = moistureSensValue5;
+    }
+
+    public void setMoistureSensValue6(int moistureSensValue6) {
+        this.moistureSensValue6 = moistureSensValue6;
+    }
+
+    public void setMoistureSensValue7(int moistureSensValue7) {
+        this.moistureSensValue7 = moistureSensValue7;
+    }
+
+    public void setMoistureSensValue8(int moistureSensValue8) {
+        this.moistureSensValue8 = moistureSensValue8;
+    }
+
+    public void setMoistureSensValue9(int moistureSensValue9) {
+        this.moistureSensValue9 = moistureSensValue9;
+    }
+
+    public void setMoistureSensValue10(int moistureSensValue10) {
+        this.moistureSensValue10 = moistureSensValue10;
     }
 
     public Pair<List<GreenhouseData>, Integer> generateNewDay(int secondInterval, int monthRainDays, GeneratorMonth month, GreenhouseData lastData) {
@@ -78,6 +135,12 @@ public class StandardGreenhouseData extends GreenhouseData {
         boolean water2 = false;
         boolean water3 = false;
         boolean water4 = false;
+        boolean water5 = false;
+        boolean water6 = false;
+        boolean water7 = false;
+        boolean water8 = false;
+        boolean water9 = false;
+        boolean water10 = false;
 
         //Generate special conditions (rain / fog)
         if(generateWeightedDecision(0.4) || monthDays - calendar.get(Calendar.DAY_OF_MONTH) == month.rainDays) {
@@ -106,14 +169,14 @@ public class StandardGreenhouseData extends GreenhouseData {
             fogEndEntry = (int) Math.round((month.sunrise.getMinute() * 60 + month.sunrise.getHour() * 3600 + 3600 * Math.random() * 0.25) / secondInterval);
         }
 
-        StandardGreenhouseData lastInstance = (StandardGreenhouseData) lastData;
-        StandardGreenhouseData data = null;
+        AlternativeTwoGreenhouseData lastInstance = (AlternativeTwoGreenhouseData) lastData;
+        AlternativeTwoGreenhouseData data = null;
 
         //Loop generating all other entries
         for (int entry = 1; entry <= entryCount; entry++) {
 
             //Set basic data
-            data = new StandardGreenhouseData(startId);
+            data = new AlternativeTwoGreenhouseData(startId);
 
             data.setTime((Calendar) lastInstance.getTime().clone());
             brightness = lastInstance.getBrightnessSensValue();
@@ -164,6 +227,24 @@ public class StandardGreenhouseData extends GreenhouseData {
             tempPair = generateMoisture(lastInstance.getMoistureSensValue4(), water4);
             data.setMoistureSensValue4((int) tempPair.getKey());
             water4 = (boolean) tempPair.getValue();
+            tempPair = generateMoisture(lastInstance.getMoistureSensValue5(), water5);
+            data.setMoistureSensValue5((int) tempPair.getKey());
+            water5 = (boolean) tempPair.getValue();
+            tempPair = generateMoisture(lastInstance.getMoistureSensValue6(), water6);
+            data.setMoistureSensValue6((int) tempPair.getKey());
+            water6 = (boolean) tempPair.getValue();
+            tempPair = generateMoisture(lastInstance.getMoistureSensValue7(), water7);
+            data.setMoistureSensValue7((int) tempPair.getKey());
+            water7 = (boolean) tempPair.getValue();
+            tempPair = generateMoisture(lastInstance.getMoistureSensValue8(), water8);
+            data.setMoistureSensValue8((int) tempPair.getKey());
+            water8 = (boolean) tempPair.getValue();
+            tempPair = generateMoisture(lastInstance.getMoistureSensValue9(), water9);
+            data.setMoistureSensValue9((int) tempPair.getKey());
+            water9 = (boolean) tempPair.getValue();
+            tempPair = generateMoisture(lastInstance.getMoistureSensValue10(), water10);
+            data.setMoistureSensValue10((int) tempPair.getKey());
+            water10 = (boolean) tempPair.getValue();
 
             //Set Brightness
             tempPair = generateBrightness(brightness, currentTime, month, entry, noon, rain, fog, leftNormalEntries, brightEntries);

@@ -15,13 +15,14 @@ public class Main {
                 "Möglichkeit ein solches zu simulieren.");
         System.out.println("Geben Sie ein, welche der folgenden Varianten genutzt werden soll:\n" +
                 "\t1. Standard Prototyp (4x moisture, 2x temp, 2x humidity, 1x brightness)\n" +
-                "\t2. Alternative 1 (2x moisture, 2x temp, 2x humidity, 1x brightness)");
+                "\t2. Alternative 1 (2x moisture, 2x temp, 2x humidity, 1x brightness)\n" +
+                "\t3. Alternative 2 (10x moisture, 2x temp, 2x humidity, 1x brightness)");
         boolean valid = false;
         int alternative = 0;
         while(valid == false) {
             System.out.print("Auswahl Variante: ");
             String variant = readConsole();
-            if(variant.contentEquals("1") || variant.contentEquals("2")) {
+            if(variant.contentEquals("1") || variant.contentEquals("2") || variant.contentEquals("3")) {
                 valid = true;
                 alternative = Integer.parseInt(variant);
             }

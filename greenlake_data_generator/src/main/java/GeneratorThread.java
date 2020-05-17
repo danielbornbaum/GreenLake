@@ -63,6 +63,10 @@ public class GeneratorThread extends Thread {
                 greenhouseData = new AlternativeOneGreenhouseData(greenhouseId);
                 lastEntry = new AlternativeOneGreenhouseData(greenhouseType);
                 break;
+            case 3:
+                greenhouseData = new AlternativeTwoGreenhouseData(greenhouseId);
+                lastEntry = new AlternativeTwoGreenhouseData(greenhouseType);
+                break;
         }
 
         Calendar calendar = Calendar.getInstance();
@@ -125,6 +129,23 @@ public class GeneratorThread extends Thread {
                     lastEntry.setMoistureSensValue1(jsonRecord.getInt("moisturePlant1"));
                     ((AlternativeOneGreenhouseData) lastEntry).setMoistureSensValue2(jsonRecord.getInt("moisturePlant2"));
                     break;
+                case 3:
+                    lastEntry.setTime(calendar);
+                    lastEntry.setTempSensValue1(jsonRecord.getFloat("temperatureOutside"));
+                    lastEntry.setTempSensValue2(jsonRecord.getFloat("temperatureInside"));
+                    lastEntry.setHumiditySensValue1(jsonRecord.getFloat("humidityOutside"));
+                    lastEntry.setHumiditySensValue2(jsonRecord.getFloat("humidityInside"));
+                    lastEntry.setBrightnessSensValue(jsonRecord.getFloat("brightness"));
+                    lastEntry.setMoistureSensValue1(jsonRecord.getInt("moisturePlant1"));
+                    ((AlternativeTwoGreenhouseData) lastEntry).setMoistureSensValue2(jsonRecord.getInt("moisturePlant2"));
+                    ((AlternativeTwoGreenhouseData) lastEntry).setMoistureSensValue3(jsonRecord.getInt("moisturePlant3"));
+                    ((AlternativeTwoGreenhouseData) lastEntry).setMoistureSensValue4(jsonRecord.getInt("moisturePlant4"));
+                    ((AlternativeTwoGreenhouseData) lastEntry).setMoistureSensValue5(jsonRecord.getInt("moisturePlant5"));
+                    ((AlternativeTwoGreenhouseData) lastEntry).setMoistureSensValue6(jsonRecord.getInt("moisturePlant6"));
+                    ((AlternativeTwoGreenhouseData) lastEntry).setMoistureSensValue7(jsonRecord.getInt("moisturePlant7"));
+                    ((AlternativeTwoGreenhouseData) lastEntry).setMoistureSensValue8(jsonRecord.getInt("moisturePlant8"));
+                    ((AlternativeTwoGreenhouseData) lastEntry).setMoistureSensValue9(jsonRecord.getInt("moisturePlant9"));
+                    ((AlternativeTwoGreenhouseData) lastEntry).setMoistureSensValue10(jsonRecord.getInt("moisturePlant10"));
             }
         }
         catch (Exception e) {
@@ -158,6 +179,24 @@ public class GeneratorThread extends Thread {
                     lastEntry.setBrightnessSensValue(0);
                     lastEntry.setMoistureSensValue1(70);
                     ((AlternativeOneGreenhouseData) lastEntry).setMoistureSensValue2(70);
+                    break;
+                case 3:
+                    lastEntry.setTime(calendar);
+                    lastEntry.setTempSensValue1(8);
+                    lastEntry.setTempSensValue2(18);
+                    lastEntry.setHumiditySensValue1(52);
+                    lastEntry.setHumiditySensValue2(78);
+                    lastEntry.setBrightnessSensValue(0);
+                    lastEntry.setMoistureSensValue1(70);
+                    ((AlternativeTwoGreenhouseData) lastEntry).setMoistureSensValue2(70);
+                    ((AlternativeTwoGreenhouseData) lastEntry).setMoistureSensValue3(70);
+                    ((AlternativeTwoGreenhouseData) lastEntry).setMoistureSensValue4(70);
+                    ((AlternativeTwoGreenhouseData) lastEntry).setMoistureSensValue5(70);
+                    ((AlternativeTwoGreenhouseData) lastEntry).setMoistureSensValue6(70);
+                    ((AlternativeTwoGreenhouseData) lastEntry).setMoistureSensValue7(70);
+                    ((AlternativeTwoGreenhouseData) lastEntry).setMoistureSensValue8(70);
+                    ((AlternativeTwoGreenhouseData) lastEntry).setMoistureSensValue9(70);
+                    ((AlternativeTwoGreenhouseData) lastEntry).setMoistureSensValue10(70);
                     break;
             }
         }
@@ -262,6 +301,28 @@ public class GeneratorThread extends Thread {
                                 .put("brightness", altOneEntry.getBrightnessSensValue())
                                 .put("moisturePlant1", altOneEntry.getMoistureSensValue1())
                                 .put("moisturePlant2", altOneEntry.getMoistureSensValue2())
+                                .toString();
+                        break;
+                    case 3:
+                        AlternativeTwoGreenhouseData altTwoEntry = (AlternativeTwoGreenhouseData) entry;
+                        jsonString = new JSONObject()
+                                .put("greenhouseID", 1)
+                                .put("timestamp", converter.ConvertToJson(altTwoEntry.getTime()))
+                                .put("temperatureOutside", altTwoEntry.getTempSensValue1())
+                                .put("temperatureInside", altTwoEntry.getTempSensValue2())
+                                .put("humidityOutside", altTwoEntry.getHumiditySensValue1())
+                                .put("humidityInside", altTwoEntry.getHumiditySensValue2())
+                                .put("brightness", altTwoEntry.getBrightnessSensValue())
+                                .put("moisturePlant1", altTwoEntry.getMoistureSensValue1())
+                                .put("moisturePlant2", altTwoEntry.getMoistureSensValue2())
+                                .put("moisturePlant3", altTwoEntry.getMoistureSensValue3())
+                                .put("moisturePlant4", altTwoEntry.getMoistureSensValue4())
+                                .put("moisturePlant5", altTwoEntry.getMoistureSensValue5())
+                                .put("moisturePlant6", altTwoEntry.getMoistureSensValue6())
+                                .put("moisturePlant7", altTwoEntry.getMoistureSensValue7())
+                                .put("moisturePlant8", altTwoEntry.getMoistureSensValue8())
+                                .put("moisturePlant9", altTwoEntry.getMoistureSensValue9())
+                                .put("moisturePlant10", altTwoEntry.getMoistureSensValue10())
                                 .toString();
                         break;
                 }

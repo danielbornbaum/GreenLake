@@ -11,11 +11,8 @@ import java.util.*;
 
 public class AlternativeOneGreenhouseData extends GreenhouseData {
     final Logger logger = LoggerFactory.getLogger(AlternativeOneGreenhouseData.class);
-<<<<<<< HEAD
 
     private int moistureSensValue2;
-=======
->>>>>>> c714e12e289d924050fd97927b973d8bce2dbcad
     private Random random;
 
     public int getMoistureSensValue2() {
@@ -176,21 +173,7 @@ public class AlternativeOneGreenhouseData extends GreenhouseData {
         return new Pair<>(day, monthRainDays);
     }
 
-<<<<<<< HEAD
-    private int generateMoisture(int lastMoisture){
-=======
-    private boolean generateWeightedDecision(double occurenceProbability) {
-        double random = Math.random();
-        if (random > occurenceProbability) {
-            return false;
-        }
-        else {
-            return true;
-        }
-    }
-
-    private Pair<Integer, Boolean> generateMoisture(int lastMoisture, boolean water){
->>>>>>> c714e12e289d924050fd97927b973d8bce2dbcad
+    private Pair<Integer, Boolean> generateMoisture(int lastMoisture, boolean water) {
         if(lastMoisture < 70) {
             water = true;
         }
