@@ -89,7 +89,7 @@ public class KafkaUtil
     public boolean kafkaAvailable()
     {
         CuratorFramework client = CuratorFrameworkFactory.builder()
-                .connectString(zookeeperURL)
+                .connectString(kafkaURL)
                 .retryPolicy(new RetryNTimes(0, 0))
                 .build();
 
@@ -247,7 +247,7 @@ public class KafkaUtil
                                    .concat(exceptionAsString));
         }
 
-        kafkaURL = "localhost:9092";
-        zookeeperURL = "localhost:2181";
+        kafkaURL = "0.0.0.0:9092";
+        zookeeperURL = "0.0.0.0:2181";
     }
 }
