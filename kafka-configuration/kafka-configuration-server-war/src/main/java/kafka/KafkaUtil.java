@@ -3,6 +3,7 @@ package kafka;
 import org.apache.curator.framework.CuratorFramework;
 import org.apache.curator.framework.CuratorFrameworkFactory;
 import org.apache.curator.retry.RetryNTimes;
+import org.apache.curator.test.TestingServer;
 import org.apache.kafka.clients.admin.AdminClient;
 import org.apache.kafka.clients.admin.KafkaAdminClient;
 import org.apache.kafka.clients.admin.NewTopic;
@@ -248,6 +249,12 @@ public class KafkaUtil
         }
 
         kafkaURL = "0.0.0.0:9092";
-        zookeeperURL = "0.0.0.0:2181";
+        TestingServer zkTestServer = null;
+        try {
+            zkTestServer = new TestingServer(31313);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        zookeeperURL = zkTestServer.getConnectString();
     }
 }
