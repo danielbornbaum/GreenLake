@@ -41,7 +41,7 @@ public class LifeCycleBean
                 .put("hadoop",
                      "http://mirror.softaculous.com/apache/hadoop/common/hadoop-2.10.0/hadoop-2.10.0.tar.gz");
 
-        fileOrDefault("kafkaHash", kafkaHashFile, "97543-135479212633214863327407-579938047",
+        fileOrDefault("kafkaHash", kafkaHashFile, "97543-13547921263321486-579938047",
                       false);
         fileOrDefault("hadoopHash", hadoopHashFile,
                       "975433076010100756194257424810714116584309433274073523508109400031",
