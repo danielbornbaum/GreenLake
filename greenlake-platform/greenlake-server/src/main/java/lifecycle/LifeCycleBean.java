@@ -44,7 +44,7 @@ public class LifeCycleBean
         fileOrDefault("kafkaHash", kafkaHashFile, "97543-13547921263321486-579938047",
                       false);
         fileOrDefault("hadoopHash", hadoopHashFile,
-                      "975433076010100756194257424810714116584309433274073523508109400031",
+                      "9754310075619425742481071411658430943523508109400031",
                       false);
         fileOrDefault("resourceDownloads", resourceDownloadFile, resourceDownloads.toString(),
                       false);
