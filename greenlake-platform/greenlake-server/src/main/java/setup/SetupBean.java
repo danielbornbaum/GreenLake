@@ -253,6 +253,7 @@ public abstract class SetupBean
 
         for (File dir : dirs)
         {
+            LOGGER.fine(dir.getName());
             if (!("log".equals(dir.getName()) || "data".equals(dir.getName())))
             {
                 hashBuilder.append(hashFoldersRecursively(path.concat(dir.getName()).concat("/")));
