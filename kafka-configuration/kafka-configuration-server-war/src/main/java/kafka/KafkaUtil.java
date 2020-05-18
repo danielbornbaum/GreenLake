@@ -248,13 +248,7 @@ public class KafkaUtil
                                    .concat(exceptionAsString));
         }
 
-        kafkaURL = "0.0.0.0:9092";
-        TestingServer zkTestServer = null;
-        try {
-            zkTestServer = new TestingServer(31313);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        zookeeperURL = zkTestServer.getConnectString();
+        kafkaURL = "localhost:9092";
+        zookeeperURL = "localhost:2181";
     }
 }
