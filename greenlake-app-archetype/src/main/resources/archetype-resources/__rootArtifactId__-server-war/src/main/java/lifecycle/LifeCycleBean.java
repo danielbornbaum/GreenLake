@@ -61,7 +61,7 @@ public class LifeCycleBean
         }
         catch (Exception e)
         {
-            //failDeployment(e);
+            failDeployment(e);
         }
     }
 
