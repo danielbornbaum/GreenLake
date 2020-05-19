@@ -33,7 +33,7 @@ public class Main {
 
         System.out.println("Beginne mit der Generierung von Daten für das Greenhouse mit der Id " + alternative);
         GeneratorThread thread = new GeneratorThread(alternative, alternative);
-        thread.run();
+        thread.start();
         logger.info("Generator thread started");
         System.out.println("Drücke Enter, um die Anwendung zu schließen.");
         readConsole();

@@ -1,0 +1,6 @@
+<jboss-deployment-structure>
+    <ear-subdeployments-isolated>true</ear-subdeployments-isolated>
+
+    <sub-deployment name="${rootArtifactId}-react-war.war"/>
+    <sub-deployment name="${rootArtifactId}-server-war.war"/>
+</jboss-deployment-structure>

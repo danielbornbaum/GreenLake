@@ -1,6 +1,0 @@
-# file: ~/.gitignore_global
-
-.idea
-target
-*.iml
-out

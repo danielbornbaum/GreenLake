@@ -1,0 +1,5 @@
+kafka\KafkaUtil$1.class
+lifecycle\LifeCycleBean.class
+rest\KafkaConfiguration.class
+kafka\KafkaUtil.class
+rest\services\KafkaService.class

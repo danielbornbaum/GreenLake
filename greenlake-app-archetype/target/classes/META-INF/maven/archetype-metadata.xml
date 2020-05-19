@@ -1,0 +1,49 @@
+<archetype-descriptor
+        xsi:schemaLocation="http://maven.apache.org/plugins/maven-archetype-plugin/archetype-descriptor/1.1.0
+            https://maven.apache.org/xsd/archetype-descriptor-1.1.0.xsd"
+        xmlns="http://maven.apache.org/plugins/maven-archetype-plugin/archetype-descriptor/1.1.0"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        name="greenlake-app-archetype">
+
+    <modules>
+        <module id="${rootArtifactId}-ear" dir="__rootArtifactId__-ear" name="${rootArtifactId}-ear">
+            <fileSets>
+                <fileSet filtered="true" packaged="false" encoding="UTF-8">
+                    <directory>/</directory>
+                    <includes>
+                        <include>**/**</include>
+                    </includes>
+                </fileSet>
+            </fileSets>
+        </module>
+        <module id="${rootArtifactId}-react-war" dir="__rootArtifactId__-react-war" name="${rootArtifactId}-react-war">
+            <fileSets>
+                <fileSet encoding="UTF-8">
+                    <directory>src/main/webapp/images</directory>
+                    <includes>
+                        <include>**/**</include>
+                    </includes>
+                </fileSet>
+                <fileSet filtered="true" packaged="false" encoding="UTF-8">
+                    <directory>/</directory>
+                    <includes>
+                        <include>**/**</include>
+                    </includes>
+                    <excludes>
+                        <exclude>src/main/webapp/images/**</exclude>
+                    </excludes>
+                </fileSet>
+            </fileSets>
+        </module>
+        <module id="${rootArtifactId}-server-war" dir="__rootArtifactId__-server-war" name="${rootArtifactId}-server-war">
+            <fileSets>
+                <fileSet filtered="true" packaged="false" encoding="UTF-8">
+                    <directory>/</directory>
+                    <includes>
+                        <include>**/**</include>
+                    </includes>
+                </fileSet>
+            </fileSets>
+        </module>
+    </modules>
+</archetype-descriptor>

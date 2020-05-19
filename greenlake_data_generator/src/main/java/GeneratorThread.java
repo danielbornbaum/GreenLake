@@ -6,6 +6,10 @@ import org.apache.kafka.clients.consumer.KafkaConsumer;
 import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.Producer;
 import org.apache.kafka.clients.producer.ProducerRecord;
+import org.apache.kafka.common.serialization.LongDeserializer;
+import org.apache.kafka.common.serialization.LongSerializer;
+import org.apache.kafka.common.serialization.StringDeserializer;
+import org.apache.kafka.common.serialization.StringSerializer;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -74,16 +78,16 @@ public class GeneratorThread extends Thread {
 
         try {
             Properties props = new Properties();
-            props.put(BOOTSTRAP_SERVERS_CONFIG, "192.168.2.133:9092");
+            props.put(BOOTSTRAP_SERVERS_CONFIG, "localhost:9092");
             props.put(GROUP_ID_CONFIG, "test-consumer-group");
             props.put(ENABLE_AUTO_COMMIT_CONFIG, "true");
             props.put(AUTO_COMMIT_INTERVAL_MS_CONFIG, "1000");
             props.put(SESSION_TIMEOUT_MS_CONFIG, "30000");
-            props.put(KEY_DESERIALIZER_CLASS_CONFIG, "org.apache.kafka.common.serialization.StringDeserializer");
-            props.put(VALUE_DESERIALIZER_CLASS_CONFIG, "org.apache.kafka.common.serialization.StringDeserializer");
+            props.put(KEY_DESERIALIZER_CLASS_CONFIG, LongDeserializer.class.getName());
+            props.put(VALUE_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class.getName());
 
             KafkaConsumer<String, String> consumer = new KafkaConsumer<>(props);
-            consumer.subscribe(Collections.singletonList("generator-test"));
+            consumer.subscribe(Collections.singletonList("Testtopic2"));
             consumer.poll(Duration.ofSeconds(10));
             consumer.assignment();
             AtomicLong maxTimestamp = new AtomicLong();
@@ -330,9 +334,9 @@ public class GeneratorThread extends Thread {
                 try {
                     if (!runThread && entries.indexOf(entry) == entries.size()-1) {
                         System.out.println("Warte auf Abschluss der Übertragung");
-                        producer.send(new ProducerRecord<>("generator-test", key, jsonString)).get();
+                        producer.send(new ProducerRecord<>("Testtopic2", key, jsonString)).get();
                     } else {
-                        producer.send(new ProducerRecord<>("generator-test", key, jsonString));
+                        producer.send(new ProducerRecord<>("Testtopic2", key, jsonString));
                     }
                     logger.info("New entry send to Kafka: " + jsonString);
                 }
@@ -365,14 +369,14 @@ public class GeneratorThread extends Thread {
         december = new GeneratorMonth(Season.WINTER, -1, -15, 4, 15, LocalTime.of(7,50), LocalTime.of(16, 20), (float) 1.2, 12, 85);
 
         Properties props = new Properties();
-        props.put(BOOTSTRAP_SERVERS_CONFIG, "192.168.2.133:9092");
+        props.put(BOOTSTRAP_SERVERS_CONFIG, "localhost:9092");
         props.put(ACKS_CONFIG, "all");
         props.put(RETRIES_CONFIG, 0);
         props.put(BATCH_SIZE_CONFIG, 16000);
         props.put(LINGER_MS_CONFIG, 100);
         props.put(BUFFER_MEMORY_CONFIG, 33554432);
-        props.put(KEY_SERIALIZER_CLASS_CONFIG, "org.apache.kafka.common.serialization.StringSerializer");
-        props.put(VALUE_SERIALIZER_CLASS_CONFIG, "org.apache.kafka.common.serialization.StringSerializer");
+        props.put(KEY_SERIALIZER_CLASS_CONFIG, LongSerializer.class.getName());
+        props.put(VALUE_SERIALIZER_CLASS_CONFIG, StringSerializer.class.getName());
 
         producer = new KafkaProducer<>(props);
         converter = new CalendarConverter();
