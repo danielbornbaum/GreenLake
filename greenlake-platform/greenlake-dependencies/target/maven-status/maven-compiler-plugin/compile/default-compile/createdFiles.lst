@@ -1,7 +1,0 @@
-util\HTTPStatusCodes$SUCCESS_CODES.class
-util\RestRequestManager.class
-util\HTTPStatusCodes$SERVER_ISSUES.class
-util\LoggedClientCompatibleException.class
-util\HTTPStatusCodes$CLIENT_ISSUES.class
-util\HTTPStatusCodes.class
-util\HTTPStatusCodes$Codes.class

@@ -1,6 +1,0 @@
-<jboss-deployment-structure>
-    <ear-subdeployments-isolated>true</ear-subdeployments-isolated>
-
-    <sub-deployment name="greenlake-react-war.war"/>
-    <sub-deployment name="greenlake-server.war"/>
-</jboss-deployment-structure>
