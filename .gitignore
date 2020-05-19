@@ -1,0 +1,9 @@
+# file: ~/.gitignore_global
+
+**/.idea
+**/**.iml
+**/out
+**/**.iml
+**/target
+**/node
+**/node_modules
