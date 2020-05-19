@@ -230,7 +230,7 @@ public class DataProcessor implements Runnable
 
             Context context = Context.create();
             Value function = context.eval("js",
-                                          "(function(data){var result=data;\nreturn result;})");
+                                          String.format("(function(data){%s\nreturn results;})", javascript));
             Value execute = function.execute(collectedData);
             JSONArray executionResult = new JSONArray(execute.toString());
 
@@ -436,8 +436,8 @@ public class DataProcessor implements Runnable
         String pathToHadoop = configFileJSON.getString("pathToHadoop");
 
         Configuration conf = new Configuration();
-        conf.addResource(new org.apache.hadoop.fs.Path(pathToHadoop.concat("/conf/core-site.xml")));
-        conf.addResource(new org.apache.hadoop.fs.Path(pathToConfigFile.concat("/conf/hdfs-site.xml")));
+        conf.addResource(new org.apache.hadoop.fs.Path(pathToHadoop.concat("/etc/hadoop/core-site.xml")));
+        conf.addResource(new org.apache.hadoop.fs.Path(pathToHadoop.concat("/etc/hadoop/hdfs-site.xml")));
 
         return path.getFileSystem(conf);
     }
