@@ -3,23 +3,14 @@ package kafka;
 import org.apache.curator.framework.CuratorFramework;
 import org.apache.curator.framework.CuratorFrameworkFactory;
 import org.apache.curator.retry.RetryNTimes;
-import org.apache.curator.test.TestingServer;
-import org.apache.kafka.clients.admin.AdminClient;
-import org.apache.kafka.clients.admin.KafkaAdminClient;
-import org.apache.kafka.clients.admin.NewTopic;
-import org.apache.kafka.clients.admin.TopicDescription;
-import org.apache.zookeeper.KeeperException;
-import org.apache.zookeeper.ZooKeeper;
+import org.apache.kafka.clients.admin.*;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import util.LoggedClientCompatibleException;
 
-import javax.management.*;
-import java.io.*;
-import java.lang.management.ManagementFactory;
-import java.net.HttpURLConnection;
-import java.net.URL;
-import java.nio.charset.StandardCharsets;
+import java.io.File;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.*;
@@ -89,32 +80,14 @@ public class KafkaUtil
      */
     public boolean kafkaAvailable()
     {
-        CuratorFramework client = CuratorFrameworkFactory.builder()
-                .connectString(kafkaURL)
-                .retryPolicy(new RetryNTimes(0, 0))
-                .build();
-
-        try (client)
+        try (AdminClient client = createAdminClient())
         {
-            client.start();
-            client.blockUntilConnected(3, TimeUnit.SECONDS);
-            if (!client.getZookeeperClient().isConnected())
-            {
-                return false;
-            }
-
-            ZooKeeper zookeeper = new ZooKeeper(zookeeperURL, 3000, watchedEvent -> {});
-            boolean available = zookeeper.getChildren("/brokers/ids", false).size() > 0;
-            ;
-            zookeeper.close();
-            client.close();
-            return available;
+            ListTopicsResult topics = client.listTopics();
+            topics.names().get();
+            return true;
         }
-        catch (InterruptedException | IOException | KeeperException ignored)
+        catch (InterruptedException | ExecutionException e)
         {
-            client.close();
-            LOGGER.info("Kafka was not available");
-            Thread.currentThread().interrupt();
             return false;
         }
     }
