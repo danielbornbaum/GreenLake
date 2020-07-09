@@ -103,29 +103,14 @@ class App extends React.Component{
                                 {this.state.topics.map(topic => <li key={topic.name}>{topic.replications}</li>)}
                             </ul>
                         </div>
-                        <div>
-                            <ul>
-                                {this.state.topics.map(topic => <button key={"delete_"+topic.name} onClick={() =>
-                                 this.askDeleteTopic(topic.name)}>╳</button>)}
-                            </ul>
-                        </div>
                     </div>
                 </div>
 
                 {this.state.topicWindowVisible &&
-                 <Window width={500} height={250} title="Neues Topic anlegen"
+                 <Window width={500} height={180} title="Neues Topic anlegen"
                   closeCommand={this.toggleTopicWindowVisible} closable={true}>
                     <NewTopicFormula submitCommand={this.toggleTopicWindowVisible}/>
                  </Window>}
-
-                {this.state.topicToDelete != null &&
-                    <Window width={300} height={100} title={"Topic '"+this.state.topicToDelete+"' löschen?"}
-                     closeCommand={this.clearTopicToDelete}>
-                         <div style={{display: "flex", justifyContent: "space-between"}}>
-                            <button onClick={this.deleteTopicToDelete}>Ja</button>
-                            <button onClick={this.clearTopicToDelete}>Nein</button>
-                         </div>
-                     </Window>}
             </div>
         )
     }

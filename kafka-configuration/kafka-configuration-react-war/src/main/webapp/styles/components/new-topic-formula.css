@@ -8,7 +8,7 @@ input{
   padding: 3px;
   border-radius: 2px;
   border-width: 1px;
-  width: calc(100% - 100px - 10px);
+  width: calc(100% - 100px - 60px);
 }
 
 input[type=submit]{
