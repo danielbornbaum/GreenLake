@@ -27,9 +27,10 @@ class App extends React.Component{
         this.setState({jobs: jobs});
     }
 
+
     addJob = () => {
         restRequest("/data-processing-server/jobs/add", "POST", JSON.stringify(this.defaultJob),
-        responseText => this.triggerReload, errorText => this.triggerReload);
+        responseText => this.triggerReload(), errorText => this.triggerReload());
     }
 
     render(){
@@ -39,7 +40,8 @@ class App extends React.Component{
                     <JobConfigurator key={job.id} title={job.title} code={job.javascript} id={job.id}
                     forgetting={job.forgetting} schedulingTime={job.schedulingTime} timeout={job.timeout}
                     minDataSetSize={job.minDataSetSize} maxDataSetSize={job.maxDataSetSize}
-                    consumerGroup={job.consumerGroup}/>
+                    consumerGroup={job.consumerGroup} topicOrDataIn={job.topicOrDataIn}
+                    topicOrDataOut={job.topicOrDataOut}/>
                 )}
 
                 <button className="job-add-button" onClick={this.addJob}>+</button>

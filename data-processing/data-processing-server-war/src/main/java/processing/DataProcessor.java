@@ -193,7 +193,7 @@ public class DataProcessor implements Runnable
         }
         else if (SourceDestination.HADOOP.equals(destination))
         {
-            org.apache.hadoop.fs.Path path = new org.apache.hadoop.fs.Path(topicOrDataOut.concat(".txt"));
+            org.apache.hadoop.fs.Path path = new org.apache.hadoop.fs.Path(topicOrDataOut);
             try
             {
                 outputFileSystem = constructHadoopFileSystem(path);
@@ -382,8 +382,10 @@ public class DataProcessor implements Runnable
             org.apache.hadoop.fs.Path path = new org.apache.hadoop.fs.Path(topicOrDataOut);
             try (FSDataOutputStream fileStream = outputFileSystem.create(path))
             {
+                logger.info(String.format("Trying to write '%s' to hadoop", data));
                 fileStream.writeChars(data.concat("\n"));
                 fileStream.flush();
+                logger.info("Wrote to hadoop");
             }
             catch (IOException e)
             {

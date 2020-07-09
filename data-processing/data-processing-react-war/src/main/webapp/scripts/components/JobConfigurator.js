@@ -51,6 +51,10 @@ export class JobConfigurator extends React.Component{
         this.setState({edit: !this.state.edit, expanded: true});
     }
 
+    onDeleteButtonClick = () => {
+        restRequest("/data-processing-server/jobs/remove", "DELETE", JSON.stringify({id: this.state.id}), () => {});
+    }
+
     setCode(value) {
         this.setState({ code: value });
     }
@@ -65,7 +69,7 @@ export class JobConfigurator extends React.Component{
                          style={{backgroundColor: "rgba(255, 255, 255, 0)", fontSize: "14pt", borderWidth: 0}}>
                             {this.state.expanded ? "▲" : "▼"}
                         </button>
-                        <button>🗑</button>
+                        <button onClick={this.onDeleteButtonClick}>🗑</button>
                         <button onClick={this.onEditSaveButtonClick}>{this.state.edit ? "💾":"✎"}</button>
                     </div>
                     <input className="job-configurator-title" value={this.state.title}
