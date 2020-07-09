@@ -1,4 +1,4 @@
-package GreenhouseDataModels;
+package de.dhbw.greenlake_data_generator.GreenhouseDataModels;
 
 import java.time.LocalTime;
 

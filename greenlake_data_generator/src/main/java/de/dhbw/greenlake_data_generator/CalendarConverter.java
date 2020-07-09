@@ -1,3 +1,5 @@
+package de.dhbw.greenlake_data_generator;
+
 import org.json.JSONObject;
 
 import java.util.Calendar;

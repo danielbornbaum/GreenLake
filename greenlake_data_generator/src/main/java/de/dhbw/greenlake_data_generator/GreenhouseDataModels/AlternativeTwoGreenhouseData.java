@@ -1,4 +1,4 @@
-package GreenhouseDataModels;
+package de.dhbw.greenlake_data_generator.GreenhouseDataModels;
 
 import javafx.util.Pair;
 import org.slf4j.Logger;

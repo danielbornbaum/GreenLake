@@ -1,4 +1,5 @@
-import io.netty.util.internal.logging.Slf4JLoggerFactory;
+package de.dhbw.greenlake_data_generator;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

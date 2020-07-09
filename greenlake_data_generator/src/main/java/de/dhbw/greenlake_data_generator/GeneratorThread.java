@@ -1,5 +1,8 @@
-import GreenhouseDataModels.*;
+package de.dhbw.greenlake_data_generator;
 
+import de.dhbw.greenlake_data_generator.GreenhouseDataModels.*;
+
+import de.dhbw.greenlake_data_generator.GreenhouseDataModels.*;
 import javafx.util.Pair;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
@@ -87,7 +90,7 @@ public class GeneratorThread extends Thread {
             props.put(VALUE_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class.getName());
 
             KafkaConsumer<String, String> consumer = new KafkaConsumer<>(props);
-            consumer.subscribe(Collections.singletonList("Testtopic2"));
+            consumer.subscribe(Collections.singletonList("Greenhouse"));
             consumer.poll(Duration.ofSeconds(10));
             consumer.assignment();
             AtomicLong maxTimestamp = new AtomicLong();
@@ -355,7 +358,7 @@ public class GeneratorThread extends Thread {
     }
 
     private void initialize() {
-        january = new GeneratorMonth(Season.WINTER, -2, -15, 4, 15, LocalTime.of(7,45), LocalTime.of(16, 45), (float) 1.5, 12, 85);
+        january = new GeneratorMonth(Season.WINTER, -2, -15, 4, 15, LocalTime.of(7, 45), LocalTime.of(16, 45), (float) 1.5, 12, 85);
         february = new GeneratorMonth(Season.WINTER, -2, -15, 6, 17, LocalTime.of(7,20), LocalTime.of(17, 20), (float) 2.8, 9, 82);
         march = new GeneratorMonth(Season.SPRING, 1, -5, 10, 20, LocalTime.of(6, 15), LocalTime.of(18, 15), (float) 4.2, 10, 79);
         april = new GeneratorMonth(Season.SPRING, 3, -5, 14, 25, LocalTime.of(6, 10), LocalTime.of(19, 40), (float) 6.3, 10, 74);
