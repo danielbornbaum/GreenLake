@@ -379,7 +379,7 @@ public class DataProcessor implements Runnable
         }
         else if (SourceDestination.HADOOP.equals(destination))
         {
-            org.apache.hadoop.fs.Path path = new org.apache.hadoop.fs.Path(topicOrDataOut.concat(".txt"));
+            org.apache.hadoop.fs.Path path = new org.apache.hadoop.fs.Path(topicOrDataOut);
             try (FSDataOutputStream fileStream = outputFileSystem.create(path))
             {
                 fileStream.writeChars(data.concat("\n"));
